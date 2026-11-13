@@ -1,0 +1,1634 @@
+{
+  "tool": "k11-api-functional-qa-mcp 0.1.1",
+  "generatedAt": "2026-11-13T15:34:29+00:00",
+  "environment": "local",
+  "summary": {
+    "flows": 3,
+    "passed": 1,
+    "failed": 2,
+    "blocked": 0,
+    "error": 0,
+    "steps": 30,
+    "server_errors": 2
+  },
+  "flows": [
+    {
+      "name": "Customer cancels an order and it is soft-deleted",
+      "file": "tests/api/cancel_order.yaml",
+      "environment": "local",
+      "status": "passed",
+      "steps": [
+        {
+          "name": "fixture: customer",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "main",
+            "sql": "INSERT INTO customers (id, email, name) VALUES (:id, :email, :name)",
+            "params": {
+              "id": "26dafba7-dfaa-4da8-8abf-b32442d8727f",
+              "email": "qa+0fad034cb5@example.com",
+              "name": "Test Customer"
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "id": "26dafba7-dfaa-4da8-8abf-b32442d8727f",
+            "email": "qa+0fad034cb5@example.com",
+            "name": "Test Customer"
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "place an order",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "26dafba7-dfaa-4da8-8abf-b32442d8727f",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 6,
+            "content_type": "application/json",
+            "body": {
+              "id": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b",
+              "customerId": "26dafba7-dfaa-4da8-8abf-b32442d8727f",
+              "status": "pending",
+              "total": 15.0,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1,
+                  "price": 15.0
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.status pending",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.total 15.0",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.items {\"length\": 1}",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b"
+          },
+          "error": null,
+          "ms": 6,
+          "cleanup": false
+        },
+        {
+          "name": "the order is stored as pending",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "status": "pending",
+                "total": 15.0,
+                "deleted_at": null
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "SELECT status, total, deleted_at FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b"
+            }
+          },
+          "assertions": [
+            {
+              "check": "rows 1",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "status pending",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "total 15.0",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "deleted_at {\"eq\": null}",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "cancel it",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62135/orders/edcabbf0-7764-4a53-bb6a-b4e43b21f78b",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 204,
+            "ms": 5,
+            "content_type": "",
+            "body": ""
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 204",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 5,
+          "cleanup": false
+        },
+        {
+          "name": "the API shows it as cancelled",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:62135/orders/edcabbf0-7764-4a53-bb6a-b4e43b21f78b",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 200,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "id": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b",
+              "customerId": "26dafba7-dfaa-4da8-8abf-b32442d8727f",
+              "status": "cancelled",
+              "total": 15.0,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1,
+                  "price": 15.0
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 200",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.status cancelled",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 200 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "the row is kept and marked deleted",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "status": "cancelled",
+                "deleted_at": "2026-11-13T15:34:28+00:00"
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "SELECT status, deleted_at FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b"
+            }
+          },
+          "assertions": [
+            {
+              "check": "rows 1",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "status cancelled",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "deleted_at {\"exists\": true, \"ne\": null}",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "cancelling again returns 404",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62135/orders/edcabbf0-7764-4a53-bb6a-b4e43b21f78b",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 404,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "order not found"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 404",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "cleanup: DELETE FROM order_items WHERE order_id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM order_items WHERE order_id = :orderId",
+            "params": {
+              "orderId": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 5,
+          "cleanup": true
+        },
+        {
+          "name": "cleanup: DELETE FROM orders WHERE id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "edcabbf0-7764-4a53-bb6a-b4e43b21f78b"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        },
+        {
+          "name": "fixture cleanup: customer",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM customers WHERE id = :id",
+            "params": {
+              "id": "26dafba7-dfaa-4da8-8abf-b32442d8727f"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        }
+      ],
+      "ms": 36,
+      "error": null
+    },
+    {
+      "name": "Order total is quantity times price",
+      "file": "tests/api/order_total.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "fixture: customer",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "main",
+            "sql": "INSERT INTO customers (id, email, name) VALUES (:id, :email, :name)",
+            "params": {
+              "id": "89c24811-6060-4652-bd59-109bff4a08d9",
+              "email": "qa+55bae1787d@example.com",
+              "name": "Test Customer"
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "id": "89c24811-6060-4652-bd59-109bff4a08d9",
+            "email": "qa+55bae1787d@example.com",
+            "name": "Test Customer"
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "place an order for two bags",
+          "kind": "call",
+          "status": "failed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "89c24811-6060-4652-bd59-109bff4a08d9",
+              "channel": "mobile",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 2
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 29,
+            "content_type": "application/json",
+            "body": {
+              "id": "11bc9e1c-0687-45d1-8284-40c6a3fcac59",
+              "customerId": "89c24811-6060-4652-bd59-109bff4a08d9",
+              "status": "pending",
+              "total": 42.5,
+              "channel": "mobile",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 2,
+                  "price": 42.5
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.total 85.0",
+              "ok": false,
+              "detail": "expected 85.0, got 42.5"
+            },
+            {
+              "check": "$.items[0].qty 2",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "11bc9e1c-0687-45d1-8284-40c6a3fcac59"
+          },
+          "error": null,
+          "ms": 29,
+          "cleanup": false
+        },
+        {
+          "name": "the database stores 85.00",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "total": 85.0
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "SELECT total FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "11bc9e1c-0687-45d1-8284-40c6a3fcac59"
+            }
+          },
+          "assertions": [
+            {
+              "check": "rows 1",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "total 85.0",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "order history shows 85.00",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "query": {
+              "customerId": "89c24811-6060-4652-bd59-109bff4a08d9"
+            }
+          },
+          "response": {
+            "status": 200,
+            "ms": 26,
+            "content_type": "application/json",
+            "body": [
+              {
+                "id": "11bc9e1c-0687-45d1-8284-40c6a3fcac59",
+                "customerId": "89c24811-6060-4652-bd59-109bff4a08d9",
+                "status": "pending",
+                "total": 85.0,
+                "channel": "mobile",
+                "items": [
+                  {
+                    "sku": "BAG-1",
+                    "qty": 2,
+                    "price": 42.5
+                  }
+                ]
+              }
+            ]
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 200",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$[0].total 85.0",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 200 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 26,
+          "cleanup": false
+        },
+        {
+          "name": "cleanup: DELETE FROM order_items WHERE order_id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM order_items WHERE order_id = :orderId",
+            "params": {
+              "orderId": "11bc9e1c-0687-45d1-8284-40c6a3fcac59"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 4,
+          "cleanup": true
+        },
+        {
+          "name": "cleanup: DELETE FROM orders WHERE id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "11bc9e1c-0687-45d1-8284-40c6a3fcac59"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        },
+        {
+          "name": "fixture cleanup: customer",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM customers WHERE id = :id",
+            "params": {
+              "id": "89c24811-6060-4652-bd59-109bff4a08d9"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        }
+      ],
+      "ms": 70,
+      "error": null
+    },
+    {
+      "name": "Negative and boundary tests: POST /orders",
+      "file": "tests/api/negative_post_orders.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "fixture: customer",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "main",
+            "sql": "INSERT INTO customers (id, email, name) VALUES (:id, :email, :name)",
+            "params": {
+              "id": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "email": "qa+ff1eebe3c9@example.com",
+              "name": "Test Customer"
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "id": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+            "email": "qa+ff1eebe3c9@example.com",
+            "name": "Test Customer"
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "missing required field 'customerId' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 20,
+            "content_type": "application/json",
+            "body": {
+              "error": "customerId is required"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 20,
+          "cleanup": false
+        },
+        {
+          "name": "wrong type for 'customerId' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": 12345,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 15,
+            "content_type": "application/json",
+            "body": {
+              "error": "customerId is required"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 15,
+          "cleanup": false
+        },
+        {
+          "name": "missing required field 'channel' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 16,
+            "content_type": "application/json",
+            "body": {
+              "error": "channel must be web, mobile or pos"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 16,
+          "cleanup": false
+        },
+        {
+          "name": "wrong type for 'channel' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": 12345,
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 16,
+            "content_type": "application/json",
+            "body": {
+              "error": "channel must be web, mobile or pos"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 16,
+          "cleanup": false
+        },
+        {
+          "name": "value outside the allowed list for 'channel' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "__not_an_allowed_value__",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 14,
+            "content_type": "application/json",
+            "body": {
+              "error": "channel must be web, mobile or pos"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 14,
+          "cleanup": false
+        },
+        {
+          "name": "missing required field 'items' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web"
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "items must be a non-empty array"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "wrong type for 'items' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": {
+                "not": "an array"
+              }
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "items must be a non-empty array"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "'items' just below its minItems (1) is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": []
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "items must be a non-empty array"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "'items' exactly at its minItems (1) is accepted",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 5,
+            "content_type": "application/json",
+            "body": {
+              "id": "ab9b35a4-98ba-4214-9144-0c1136c75234",
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "status": "pending",
+              "total": 42.5,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1,
+                  "price": 42.5
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "created_1": "ab9b35a4-98ba-4214-9144-0c1136c75234"
+          },
+          "error": null,
+          "ms": 5,
+          "cleanup": false
+        },
+        {
+          "name": "missing required field 'items[0].sku' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "unknown sku"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "wrong type for 'items[0].sku' is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": 12345,
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "unknown sku"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "missing required field 'items[0].qty' is rejected",
+          "kind": "call",
+          "status": "failed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1"
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 500,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "internal server error"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": false,
+              "detail": "got 500"
+            },
+            {
+              "check": "no server error",
+              "ok": false,
+              "detail": "HTTP 500: a 5xx is a bug"
+            },
+            {
+              "check": "status documented in the spec",
+              "ok": true,
+              "warn": true,
+              "detail": "500 is not documented for POST /orders"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "wrong type for 'items[0].qty' is rejected",
+          "kind": "call",
+          "status": "failed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": "not-a-number"
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 500,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "internal server error"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": false,
+              "detail": "got 500"
+            },
+            {
+              "check": "no server error",
+              "ok": false,
+              "detail": "HTTP 500: a 5xx is a bug"
+            },
+            {
+              "check": "status documented in the spec",
+              "ok": true,
+              "warn": true,
+              "detail": "500 is not documented for POST /orders"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "'items[0].qty' just below its minimum (1) is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 0
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "qty must be 1-10"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "'items[0].qty' exactly at its minimum (1) is accepted",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 5,
+            "content_type": "application/json",
+            "body": {
+              "id": "f78acb05-6478-4db0-9410-ae78452cae86",
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "status": "pending",
+              "total": 42.5,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1,
+                  "price": 42.5
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "created_2": "f78acb05-6478-4db0-9410-ae78452cae86"
+          },
+          "error": null,
+          "ms": 5,
+          "cleanup": false
+        },
+        {
+          "name": "'items[0].qty' just above its maximum (10) is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 11
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 400,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "qty must be 1-10"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [400]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "'items[0].qty' exactly at its maximum (10) is accepted",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 10
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 5,
+            "content_type": "application/json",
+            "body": {
+              "id": "6bcc6c92-80c9-42aa-bd09-7fa0ed8a9fba",
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "status": "pending",
+              "total": 42.5,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 10,
+                  "price": 42.5
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "created_3": "6bcc6c92-80c9-42aa-bd09-7fa0ed8a9fba"
+          },
+          "error": null,
+          "ms": 5,
+          "cleanup": false
+        },
+        {
+          "name": "request without credentials is rejected",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62135/orders",
+            "headers": {},
+            "body": {
+              "customerId": "7e248bb8-2bc1-440b-8219-e98e5efc4262",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "BAG-1",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 401,
+            "ms": 1,
+            "content_type": "application/json",
+            "body": {
+              "error": "unauthorized"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status [401, 403]",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "delete record created by an accepted case (1)",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62135/orders/ab9b35a4-98ba-4214-9144-0c1136c75234",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 204,
+            "ms": 17,
+            "content_type": "",
+            "body": ""
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 17,
+          "cleanup": true
+        },
+        {
+          "name": "delete record created by an accepted case (2)",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62135/orders/f78acb05-6478-4db0-9410-ae78452cae86",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 204,
+            "ms": 4,
+            "content_type": "",
+            "body": ""
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 4,
+          "cleanup": true
+        },
+        {
+          "name": "delete record created by an accepted case (3)",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62135/orders/6bcc6c92-80c9-42aa-bd09-7fa0ed8a9fba",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 204,
+            "ms": 4,
+            "content_type": "",
+            "body": ""
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 2xx",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 4,
+          "cleanup": true
+        },
+        {
+          "name": "fixture cleanup: customer",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM customers WHERE id = :id",
+            "params": {
+              "id": "7e248bb8-2bc1-440b-8219-e98e5efc4262"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        }
+      ],
+      "ms": 147,
+      "error": null
+    }
+  ]
+}

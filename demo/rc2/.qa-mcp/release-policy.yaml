@@ -1,0 +1,6 @@
+# Demo policy for release candidate 2: the same policy as rc1, after the fixes.
+name: Order platform release policy
+required: [api_tests, contract, ui_heal, llm]
+max_age_hours: 87600          # the demo evidence is committed, so don't let it go stale
+critical_consumers: [critical, high]
+approvers: ["@qa-lead", "@ai-safety-lead"]

@@ -1,0 +1,53 @@
+# Copy to .github/workflows/release-gate.yml. Runs after your test jobs have written their reports.
+#
+# Collects the evidence (heal-report.json, contract-report.json, api-test-report.json,
+# LLM Assure assessment.json, JUnit XML), applies .qa-mcp/release-policy.yaml, posts the
+# decision on the pull request and fails the check when the verdict is "block".
+name: Release gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Bring in the reports your test jobs produced (one artifact per tool, or all in one).
+      - uses: actions/download-artifact@v4
+        with:
+          path: .
+          merge-multiple: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install k11-release-gate-mcp
+
+      - name: Decide
+        id: gate
+        run: k11-release-gate-mcp evaluate --label "${{ github.head_ref || github.ref_name }}" --fail-on never
+
+      - name: Post the decision
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: release-gate
+          path: ${{ steps.gate.outputs.report }}
+
+      - name: Keep the decision record
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-decision
+          path: .qa-mcp/release-gate/
+
+      - name: Block the release
+        if: steps.gate.outputs.verdict == 'block'
+        run: |
+          echo "Release blocked: ${{ steps.gate.outputs.blockers }} blocker(s). See the PR comment."
+          exit 1

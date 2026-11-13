@@ -1,0 +1,205 @@
+{
+  "tool": "k11-selenium-qa-mcp heal-ci 0.2.1",
+  "generatedAt": "2026-11-13T15:35:33+00:00",
+  "mode": "apply",
+  "minConfidence": 0.7,
+  "testsRun": 4,
+  "failures": 4,
+  "items": [
+    {
+      "test": "tests/test_account.py::TestAccount::test_shows_my_orders",
+      "file": "tests/test_account.py",
+      "locator": "(By.ID, \"view-orders\")",
+      "line": 10,
+      "page": "http://127.0.0.1:62172/account.html",
+      "outcome": "applied",
+      "confidence": 0.82,
+      "suggestion": "(By.ID, \"orders-toggle\")",
+      "reasons": [
+        "name matches",
+        "role matches",
+        "text matches",
+        "type matches",
+        "tag matches",
+        "classes similar (43%): \"btn btn-primary\" → \"action action-main\""
+      ],
+      "runnerUp": {
+        "locator": "(By.ID, \"returns-toggle\")",
+        "score": 0.59
+      },
+      "candidates": [
+        {
+          "locator": "(By.ID, \"orders-toggle\")",
+          "score": 0.82,
+          "reasons": [
+            "name matches",
+            "role matches",
+            "text matches",
+            "type matches",
+            "tag matches",
+            "classes similar (43%): \"btn btn-primary\" → \"action action-main\""
+          ]
+        },
+        {
+          "locator": "(By.ID, \"returns-toggle\")",
+          "score": 0.59,
+          "reasons": [
+            "name similar (58%): \"View orders\" → \"View returns\"",
+            "role matches",
+            "text similar (58%): \"View orders\" → \"View returns\"",
+            "type matches",
+            "tag matches"
+          ]
+        },
+        {
+          "locator": "(By.ID, \"cart-toggle\")",
+          "score": 0.47,
+          "reasons": [
+            "role matches",
+            "type matches",
+            "tag matches"
+          ]
+        }
+      ],
+      "replacements": [
+        {
+          "file": "tests/pages/account_page.py",
+          "line": 7,
+          "before": "By.ID, \"view-orders\"",
+          "after": "By.ID, \"orders-toggle\""
+        }
+      ],
+      "verified": true,
+      "note": null
+    },
+    {
+      "test": "tests/test_account.py::TestAccount::test_opens_the_profile_editor",
+      "file": "tests/test_account.py",
+      "locator": "(By.LINK_TEXT, \"Edit profile\")",
+      "line": 14,
+      "page": "http://127.0.0.1:62172/account.html",
+      "outcome": "needs_review",
+      "confidence": 0.45,
+      "suggestion": "(By.LINK_TEXT, \"Account settings\")",
+      "reasons": [
+        "role matches",
+        "tag matches"
+      ],
+      "runnerUp": {
+        "locator": "(By.ID, \"logout\")",
+        "score": 0.44
+      },
+      "candidates": [
+        {
+          "locator": "(By.LINK_TEXT, \"Account settings\")",
+          "score": 0.45,
+          "reasons": [
+            "role matches",
+            "tag matches"
+          ]
+        },
+        {
+          "locator": "(By.ID, \"logout\")",
+          "score": 0.44,
+          "reasons": [
+            "role matches",
+            "tag matches"
+          ]
+        },
+        {
+          "locator": "(By.ID, \"orders-toggle\")",
+          "score": 0.09,
+          "reasons": [
+            "role differs: \"link\" → \"button\"",
+            "tag differs: \"a\" → \"button\""
+          ]
+        }
+      ],
+      "replacements": [],
+      "verified": null,
+      "note": "Best match is not clearly better than the alternatives; confirm before applying."
+    },
+    {
+      "test": "tests/test_account.py::TestAccount::test_shows_an_empty_cart",
+      "file": "tests/test_account.py",
+      "locator": "(By.ID, \"cart-btn\")",
+      "line": 18,
+      "page": "http://127.0.0.1:62172/account.html",
+      "outcome": "reverted",
+      "confidence": 0.85,
+      "suggestion": "(By.ID, \"cart-toggle\")",
+      "reasons": [
+        "name matches",
+        "id similar (45%): \"cart-btn\" → \"cart-toggle\"",
+        "role matches",
+        "text matches",
+        "type matches",
+        "tag matches",
+        "classes similar (50%): \"btn\" → \"action\""
+      ],
+      "runnerUp": {
+        "locator": "(By.ID, \"returns-toggle\")",
+        "score": 0.5
+      },
+      "candidates": [
+        {
+          "locator": "(By.ID, \"cart-toggle\")",
+          "score": 0.85,
+          "reasons": [
+            "name matches",
+            "id similar (45%): \"cart-btn\" → \"cart-toggle\"",
+            "role matches",
+            "text matches",
+            "type matches",
+            "tag matches",
+            "classes similar (50%): \"btn\" → \"action\""
+          ]
+        },
+        {
+          "locator": "(By.ID, \"returns-toggle\")",
+          "score": 0.5,
+          "reasons": [
+            "role matches",
+            "type matches",
+            "tag matches",
+            "classes similar (50%): \"btn\" → \"action\""
+          ]
+        },
+        {
+          "locator": "(By.ID, \"orders-toggle\")",
+          "score": 0.49,
+          "reasons": [
+            "role matches",
+            "type matches",
+            "tag matches"
+          ]
+        }
+      ],
+      "replacements": [
+        {
+          "file": "tests/pages/account_page.py",
+          "line": 9,
+          "before": "By.ID, \"cart-btn\"",
+          "after": "By.ID, \"cart-toggle\""
+        }
+      ],
+      "verified": false,
+      "note": "Healed test still failed on re-run; this change was reverted (other changes were kept)."
+    }
+  ],
+  "otherFailures": [
+    {
+      "test": "tests/test_account.py::TestAccount::test_has_the_account_title",
+      "file": "tests/test_account.py",
+      "error": "AssertionError: assert 'Acme – Your account' == 'Acme – My account'"
+    }
+  ],
+  "counts": {
+    "applied": 1,
+    "suggested": 0,
+    "reverted": 1,
+    "needs_review": 1,
+    "not_found": 0,
+    "skipped": 0
+  }
+}

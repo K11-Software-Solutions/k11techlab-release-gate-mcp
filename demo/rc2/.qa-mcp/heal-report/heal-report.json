@@ -1,0 +1,85 @@
+{
+  "tool": "k11-selenium-qa-mcp heal-ci 0.2.1",
+  "generatedAt": "2026-11-13T15:35:50+00:00",
+  "mode": "apply",
+  "minConfidence": 0.7,
+  "testsRun": 1,
+  "failures": 1,
+  "items": [
+    {
+      "test": "tests/test_account.py::TestAccount::test_shows_my_orders",
+      "file": "tests/test_account.py",
+      "locator": "(By.ID, \"view-orders\")",
+      "line": 10,
+      "page": "http://127.0.0.1:55254/account.html",
+      "outcome": "applied",
+      "confidence": 0.82,
+      "suggestion": "(By.ID, \"orders-toggle\")",
+      "reasons": [
+        "name matches",
+        "role matches",
+        "text matches",
+        "type matches",
+        "tag matches",
+        "classes similar (43%): \"btn btn-primary\" → \"action action-main\""
+      ],
+      "runnerUp": {
+        "locator": "(By.ID, \"returns-toggle\")",
+        "score": 0.59
+      },
+      "candidates": [
+        {
+          "locator": "(By.ID, \"orders-toggle\")",
+          "score": 0.82,
+          "reasons": [
+            "name matches",
+            "role matches",
+            "text matches",
+            "type matches",
+            "tag matches",
+            "classes similar (43%): \"btn btn-primary\" → \"action action-main\""
+          ]
+        },
+        {
+          "locator": "(By.ID, \"returns-toggle\")",
+          "score": 0.59,
+          "reasons": [
+            "name similar (58%): \"View orders\" → \"View returns\"",
+            "role matches",
+            "text similar (58%): \"View orders\" → \"View returns\"",
+            "type matches",
+            "tag matches"
+          ]
+        },
+        {
+          "locator": "(By.ID, \"cart-toggle\")",
+          "score": 0.47,
+          "reasons": [
+            "role matches",
+            "type matches",
+            "tag matches"
+          ]
+        }
+      ],
+      "replacements": [
+        {
+          "file": "tests/pages/account_page.py",
+          "line": 7,
+          "before": "By.ID, \"view-orders\"",
+          "after": "By.ID, \"orders-toggle\""
+        }
+      ],
+      "verified": true,
+      "note": null
+    }
+  ],
+  "otherFailures": [],
+  "counts": {
+    "applied": 1,
+    "suggested": 0,
+    "reverted": 0,
+    "needs_review": 0,
+    "not_found": 0,
+    "skipped": 0
+  }
+}

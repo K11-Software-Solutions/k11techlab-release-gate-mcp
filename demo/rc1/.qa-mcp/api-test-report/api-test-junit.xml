@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="api-functional" tests="3" failures="2" errors="0">
+  <testsuite name="Customer cancels an order and it is soft-deleted" tests="7" failures="0" errors="0" time="0.036">
+    <testcase name="fixture: customer" classname="tests/api/cancel_order.yaml" time="0.000">
+    </testcase>
+    <testcase name="place an order" classname="tests/api/cancel_order.yaml" time="0.006">
+    </testcase>
+    <testcase name="the order is stored as pending" classname="tests/api/cancel_order.yaml" time="0.001">
+    </testcase>
+    <testcase name="cancel it" classname="tests/api/cancel_order.yaml" time="0.005">
+    </testcase>
+    <testcase name="the API shows it as cancelled" classname="tests/api/cancel_order.yaml" time="0.002">
+    </testcase>
+    <testcase name="the row is kept and marked deleted" classname="tests/api/cancel_order.yaml" time="0.001">
+    </testcase>
+    <testcase name="cancelling again returns 404" classname="tests/api/cancel_order.yaml" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="Order total is quantity times price" tests="4" failures="1" errors="0" time="0.070">
+    <testcase name="fixture: customer" classname="tests/api/order_total.yaml" time="0.000">
+    </testcase>
+    <testcase name="place an order for two bags" classname="tests/api/order_total.yaml" time="0.029">
+      <failure message="$.total 85.0: expected 85.0, got 42.5">{"status": 201, "ms": 29, "content_type": "application/json", "body": {"id": "11bc9e1c-0687-45d1-8284-40c6a3fcac59", "customerId": "89c24811-6060-4652-bd59-109bff4a08d9", "status": "pending", "total": 42.5, "channel": "mobile", "items": [{"sku": "BAG-1", "qty": 2, "price": 42.5}]}}</failure>
+    </testcase>
+    <testcase name="the database stores 85.00" classname="tests/api/order_total.yaml" time="0.001">
+    </testcase>
+    <testcase name="order history shows 85.00" classname="tests/api/order_total.yaml" time="0.026">
+    </testcase>
+  </testsuite>
+  <testsuite name="Negative and boundary tests: POST /orders" tests="19" failures="2" errors="0" time="0.147">
+    <testcase name="fixture: customer" classname="tests/api/negative_post_orders.yaml" time="0.000">
+    </testcase>
+    <testcase name="missing required field 'customerId' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.020">
+    </testcase>
+    <testcase name="wrong type for 'customerId' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.015">
+    </testcase>
+    <testcase name="missing required field 'channel' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.016">
+    </testcase>
+    <testcase name="wrong type for 'channel' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.016">
+    </testcase>
+    <testcase name="value outside the allowed list for 'channel' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.014">
+    </testcase>
+    <testcase name="missing required field 'items' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="wrong type for 'items' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="'items' just below its minItems (1) is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="'items' exactly at its minItems (1) is accepted" classname="tests/api/negative_post_orders.yaml" time="0.005">
+    </testcase>
+    <testcase name="missing required field 'items[0].sku' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="wrong type for 'items[0].sku' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="missing required field 'items[0].qty' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+      <failure message="status [400]: got 500; no server error: HTTP 500: a 5xx is a bug">{"status": 500, "ms": 2, "content_type": "application/json", "body": {"error": "internal server error"}}</failure>
+    </testcase>
+    <testcase name="wrong type for 'items[0].qty' is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+      <failure message="status [400]: got 500; no server error: HTTP 500: a 5xx is a bug">{"status": 500, "ms": 2, "content_type": "application/json", "body": {"error": "internal server error"}}</failure>
+    </testcase>
+    <testcase name="'items[0].qty' just below its minimum (1) is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="'items[0].qty' exactly at its minimum (1) is accepted" classname="tests/api/negative_post_orders.yaml" time="0.005">
+    </testcase>
+    <testcase name="'items[0].qty' just above its maximum (10) is rejected" classname="tests/api/negative_post_orders.yaml" time="0.002">
+    </testcase>
+    <testcase name="'items[0].qty' exactly at its maximum (10) is accepted" classname="tests/api/negative_post_orders.yaml" time="0.005">
+    </testcase>
+    <testcase name="request without credentials is rejected" classname="tests/api/negative_post_orders.yaml" time="0.001">
+    </testcase>
+  </testsuite>
+</testsuites>

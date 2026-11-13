@@ -1,0 +1,21 @@
+{
+  "name": "release-gate",
+  "version": "0.1.0",
+  "description": "One release decision from all your QA evidence (UI healing, API contract, API functional, LLM red-team, JUnit) under a written policy: ship, ship with conditions, needs a person, or block, with an audit trail.",
+  "author": {
+    "name": "Kavita A. Jadhav",
+    "url": "https://k11softwaresolutions.com"
+  },
+  "homepage": "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp",
+  "repository": "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp",
+  "license": "MIT",
+  "keywords": [
+    "release",
+    "quality-gate",
+    "release-readiness",
+    "audit",
+    "human-in-the-loop",
+    "qa",
+    "mcp"
+  ]
+}

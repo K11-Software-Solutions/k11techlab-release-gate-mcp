@@ -1,0 +1,241 @@
+{
+  "tool": "k11-api-contract-qa-mcp 0.1.0",
+  "generatedAt": "2026-11-13T15:34:05+00:00",
+  "api": "Order Service",
+  "base": "openapi.v1.yaml",
+  "head": "openapi.yaml",
+  "summary": {
+    "total": 11,
+    "breaking": 6,
+    "compatible": 5,
+    "worst": "critical"
+  },
+  "impact": {
+    "verdict": "breaking",
+    "needs_human": true,
+    "needs_human_reason": "3 consumers break (threshold 2); high-criticality consumer(s) break: notification-svc, billing-svc, checkout-web",
+    "breaking_changes": 6,
+    "worst_severity": "critical",
+    "consumers_known": 4,
+    "consumers_broken": [
+      {
+        "consumer": "billing-svc",
+        "repo": "K11-Software-Solutions/k11-payment-service",
+        "owner": "@team-billing",
+        "criticality": "critical",
+        "changes": [
+          {
+            "rule": "type_changed",
+            "breaking": true,
+            "severity": "high",
+            "endpoint": "GET /orders/{id}",
+            "location": "response",
+            "field": "total",
+            "before": "number",
+            "after": "string",
+            "description": "Response field 'total' changed type from number to string",
+            "why": "reads 'total'"
+          }
+        ]
+      },
+      {
+        "consumer": "checkout-web",
+        "repo": "",
+        "owner": "@team-web",
+        "criticality": "high",
+        "changes": [
+          {
+            "rule": "required_field_added",
+            "breaking": true,
+            "severity": "high",
+            "endpoint": "POST /orders",
+            "location": "request",
+            "field": "channel",
+            "before": "",
+            "after": "string",
+            "description": "New required request field 'channel'",
+            "why": "doesn't send the now-required 'channel'"
+          }
+        ]
+      },
+      {
+        "consumer": "notification-svc",
+        "repo": "K11-Software-Solutions/k11-notification-svc",
+        "owner": "@team-notify",
+        "criticality": "high",
+        "changes": [
+          {
+            "rule": "field_removed",
+            "breaking": true,
+            "severity": "high",
+            "endpoint": "GET /orders/{id}",
+            "location": "response",
+            "field": "customer.email",
+            "before": "string(email)",
+            "after": "",
+            "description": "Response field 'customer.email' was removed",
+            "why": "reads 'customer.email'"
+          }
+        ]
+      }
+    ],
+    "breaking_without_known_consumers": [
+      {
+        "rule": "endpoint_removed",
+        "breaking": true,
+        "severity": "critical",
+        "endpoint": "DELETE /orders/{orderId}",
+        "location": "endpoint",
+        "field": "",
+        "before": "DELETE /orders/{orderId}",
+        "after": "",
+        "description": "Endpoint DELETE /orders/{orderId} was removed"
+      },
+      {
+        "rule": "field_removed",
+        "breaking": true,
+        "severity": "high",
+        "endpoint": "POST /orders",
+        "location": "response",
+        "field": "customer.email",
+        "before": "string(email)",
+        "after": "",
+        "description": "Response field 'customer.email' was removed"
+      },
+      {
+        "rule": "type_changed",
+        "breaking": true,
+        "severity": "high",
+        "endpoint": "POST /orders",
+        "location": "response",
+        "field": "total",
+        "before": "number",
+        "after": "string",
+        "description": "Response field 'total' changed type from number to string"
+      }
+    ]
+  },
+  "changes": [
+    {
+      "rule": "endpoint_removed",
+      "breaking": true,
+      "severity": "critical",
+      "endpoint": "DELETE /orders/{orderId}",
+      "location": "endpoint",
+      "field": "",
+      "before": "DELETE /orders/{orderId}",
+      "after": "",
+      "description": "Endpoint DELETE /orders/{orderId} was removed"
+    },
+    {
+      "rule": "field_removed",
+      "breaking": true,
+      "severity": "high",
+      "endpoint": "GET /orders/{id}",
+      "location": "response",
+      "field": "customer.email",
+      "before": "string(email)",
+      "after": "",
+      "description": "Response field 'customer.email' was removed"
+    },
+    {
+      "rule": "type_changed",
+      "breaking": true,
+      "severity": "high",
+      "endpoint": "GET /orders/{id}",
+      "location": "response",
+      "field": "total",
+      "before": "number",
+      "after": "string",
+      "description": "Response field 'total' changed type from number to string"
+    },
+    {
+      "rule": "required_field_added",
+      "breaking": true,
+      "severity": "high",
+      "endpoint": "POST /orders",
+      "location": "request",
+      "field": "channel",
+      "before": "",
+      "after": "string",
+      "description": "New required request field 'channel'"
+    },
+    {
+      "rule": "field_removed",
+      "breaking": true,
+      "severity": "high",
+      "endpoint": "POST /orders",
+      "location": "response",
+      "field": "customer.email",
+      "before": "string(email)",
+      "after": "",
+      "description": "Response field 'customer.email' was removed"
+    },
+    {
+      "rule": "type_changed",
+      "breaking": true,
+      "severity": "high",
+      "endpoint": "POST /orders",
+      "location": "response",
+      "field": "total",
+      "before": "number",
+      "after": "string",
+      "description": "Response field 'total' changed type from number to string"
+    },
+    {
+      "rule": "enum_value_added",
+      "breaking": false,
+      "severity": "low",
+      "endpoint": "GET /orders",
+      "location": "response",
+      "field": "[].status",
+      "before": "['pending', 'paid', 'shipped']",
+      "after": "['pending', 'paid', 'shipped', 'refunded']",
+      "description": "Response field '[].status' may now be ['refunded']; check consumers that switch on it"
+    },
+    {
+      "rule": "enum_value_added",
+      "breaking": false,
+      "severity": "low",
+      "endpoint": "GET /orders/{id}",
+      "location": "response",
+      "field": "status",
+      "before": "['pending', 'paid', 'shipped']",
+      "after": "['pending', 'paid', 'shipped', 'refunded']",
+      "description": "Response field 'status' may now be ['refunded']; check consumers that switch on it"
+    },
+    {
+      "rule": "endpoint_added",
+      "breaking": false,
+      "severity": "low",
+      "endpoint": "GET /orders/{id}/tracking",
+      "location": "endpoint",
+      "field": "",
+      "before": "",
+      "after": "GET /orders/{id}/tracking",
+      "description": "New endpoint GET /orders/{id}/tracking"
+    },
+    {
+      "rule": "field_removed",
+      "breaking": false,
+      "severity": "low",
+      "endpoint": "POST /orders",
+      "location": "request",
+      "field": "note",
+      "before": "string",
+      "after": "",
+      "description": "Request field 'note' was removed; callers still sending it may be rejected if the server forbids unknown fields"
+    },
+    {
+      "rule": "enum_value_added",
+      "breaking": false,
+      "severity": "low",
+      "endpoint": "POST /orders",
+      "location": "response",
+      "field": "status",
+      "before": "['pending', 'paid', 'shipped']",
+      "after": "['pending', 'paid', 'shipped', 'refunded']",
+      "description": "Response field 'status' may now be ['refunded']; check consumers that switch on it"
+    }
+  ]
+}

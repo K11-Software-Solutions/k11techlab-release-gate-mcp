@@ -1,0 +1,14 @@
+{
+  "name": "k11-release-gate",
+  "owner": {
+    "name": "K11 Software Solutions",
+    "url": "https://k11softwaresolutions.com"
+  },
+  "plugins": [
+    {
+      "name": "release-gate",
+      "source": "./",
+      "description": "Release decisions from QA evidence under a written policy, with an audit trail."
+    }
+  ]
+}

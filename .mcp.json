@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "release-gate": {
+      "command": "uvx",
+      "args": [
+        "k11-release-gate-mcp"
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="api-functional" tests="1" failures="0" errors="0">
+  <testsuite name="Customer cancels an order and it is soft-deleted" tests="7" failures="0" errors="0" time="0.089">
+    <testcase name="fixture: customer" classname="tests/api/cancel_order.yaml" time="0.000">
+    </testcase>
+    <testcase name="place an order" classname="tests/api/cancel_order.yaml" time="0.028">
+    </testcase>
+    <testcase name="the order is stored as pending" classname="tests/api/cancel_order.yaml" time="0.001">
+    </testcase>
+    <testcase name="cancel it" classname="tests/api/cancel_order.yaml" time="0.028">
+    </testcase>
+    <testcase name="the API shows it as cancelled" classname="tests/api/cancel_order.yaml" time="0.014">
+    </testcase>
+    <testcase name="the row is kept and marked deleted" classname="tests/api/cancel_order.yaml" time="0.001">
+    </testcase>
+    <testcase name="cancelling again returns 404" classname="tests/api/cancel_order.yaml" time="0.002">
+    </testcase>
+  </testsuite>
+</testsuites>

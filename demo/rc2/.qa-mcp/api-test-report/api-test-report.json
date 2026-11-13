@@ -1,0 +1,404 @@
+{
+  "tool": "k11-api-functional-qa-mcp 0.1.1",
+  "generatedAt": "2026-11-13T15:34:29+00:00",
+  "environment": "local",
+  "summary": {
+    "flows": 1,
+    "passed": 1,
+    "failed": 0,
+    "blocked": 0,
+    "error": 0,
+    "steps": 7,
+    "server_errors": 0
+  },
+  "flows": [
+    {
+      "name": "Customer cancels an order and it is soft-deleted",
+      "file": "tests/api/cancel_order.yaml",
+      "environment": "local",
+      "status": "passed",
+      "steps": [
+        {
+          "name": "fixture: customer",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "main",
+            "sql": "INSERT INTO customers (id, email, name) VALUES (:id, :email, :name)",
+            "params": {
+              "id": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4",
+              "email": "qa+9371e7f76b@example.com",
+              "name": "Test Customer"
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "id": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4",
+            "email": "qa+9371e7f76b@example.com",
+            "name": "Test Customer"
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "place an order",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:62163/orders",
+            "headers": {
+              "Authorization": "•••"
+            },
+            "body": {
+              "customerId": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4",
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 28,
+            "content_type": "application/json",
+            "body": {
+              "id": "848181c7-8fe5-48b7-b715-999b77aeac83",
+              "customerId": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4",
+              "status": "pending",
+              "total": 15.0,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1,
+                  "price": 15.0
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.status pending",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.total 15.0",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.items {\"length\": 1}",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 201 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "848181c7-8fe5-48b7-b715-999b77aeac83"
+          },
+          "error": null,
+          "ms": 28,
+          "cleanup": false
+        },
+        {
+          "name": "the order is stored as pending",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "status": "pending",
+                "total": 15.0,
+                "deleted_at": null
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "SELECT status, total, deleted_at FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "848181c7-8fe5-48b7-b715-999b77aeac83"
+            }
+          },
+          "assertions": [
+            {
+              "check": "rows 1",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "status pending",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "total 15.0",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "deleted_at {\"eq\": null}",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "cancel it",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62163/orders/848181c7-8fe5-48b7-b715-999b77aeac83",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 204,
+            "ms": 28,
+            "content_type": "",
+            "body": ""
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 204",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 28,
+          "cleanup": false
+        },
+        {
+          "name": "the API shows it as cancelled",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:62163/orders/848181c7-8fe5-48b7-b715-999b77aeac83",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 200,
+            "ms": 14,
+            "content_type": "application/json",
+            "body": {
+              "id": "848181c7-8fe5-48b7-b715-999b77aeac83",
+              "customerId": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4",
+              "status": "cancelled",
+              "total": 15.0,
+              "channel": "web",
+              "items": [
+                {
+                  "sku": "HAT-2",
+                  "qty": 1,
+                  "price": 15.0
+                }
+              ]
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 200",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "$.status cancelled",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches the 200 response schema",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 14,
+          "cleanup": false
+        },
+        {
+          "name": "the row is kept and marked deleted",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "status": "cancelled",
+                "deleted_at": "2026-11-13T15:34:29+00:00"
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "SELECT status, deleted_at FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "848181c7-8fe5-48b7-b715-999b77aeac83"
+            }
+          },
+          "assertions": [
+            {
+              "check": "rows 1",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "status cancelled",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "deleted_at {\"exists\": true, \"ne\": null}",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "cancelling again returns 404",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:62163/orders/848181c7-8fe5-48b7-b715-999b77aeac83",
+            "headers": {
+              "Authorization": "•••"
+            }
+          },
+          "response": {
+            "status": 404,
+            "ms": 2,
+            "content_type": "application/json",
+            "body": {
+              "error": "order not found"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 404",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 2,
+          "cleanup": false
+        },
+        {
+          "name": "cleanup: DELETE FROM order_items WHERE order_id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM order_items WHERE order_id = :orderId",
+            "params": {
+              "orderId": "848181c7-8fe5-48b7-b715-999b77aeac83"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        },
+        {
+          "name": "cleanup: DELETE FROM orders WHERE id = :orderId",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM orders WHERE id = :orderId",
+            "params": {
+              "orderId": "848181c7-8fe5-48b7-b715-999b77aeac83"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        },
+        {
+          "name": "fixture cleanup: customer",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "main",
+            "sql": "DELETE FROM customers WHERE id = :id",
+            "params": {
+              "id": "2725a8e6-1000-4ffb-b03f-0f280e19a2e4"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 4,
+          "cleanup": true
+        }
+      ],
+      "ms": 89,
+      "error": null
+    }
+  ]
+}

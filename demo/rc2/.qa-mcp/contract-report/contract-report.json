@@ -1,0 +1,24 @@
+{
+  "tool": "k11-api-contract-qa-mcp 0.1.0",
+  "generatedAt": "2026-11-13T15:34:05+00:00",
+  "api": "Order Service",
+  "base": "openapi.yaml",
+  "head": "openapi.yaml",
+  "summary": {
+    "total": 0,
+    "breaking": 0,
+    "compatible": 0,
+    "worst": null
+  },
+  "impact": {
+    "verdict": "compatible",
+    "needs_human": false,
+    "needs_human_reason": "",
+    "breaking_changes": 0,
+    "worst_severity": null,
+    "consumers_known": 4,
+    "consumers_broken": [],
+    "breaking_without_known_consumers": []
+  },
+  "changes": []
+}
