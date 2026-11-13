@@ -27,6 +27,20 @@ The kind of evidence is recognised from the file's content:
 | LLM red-team (`assessment.json`) | [LLM Assure](https://github.com/K11-Software-Solutions/k11techlab-llm-assurance-toolkit) |
 | Any JUnit XML | pytest, Maven Surefire, Gradle, Jest, Playwright, … |
 
+## Which checks does this change need?
+
+```bash
+k11-release-gate-mcp plan --base origin/main
+```
+
+The gate compares the branch with `--base` and maps the changed files to evidence kinds using the policy's `triggers` (sensible defaults included): an `openapi.yaml` change needs contract and API evidence, `.tsx`/`.css`/templates need UI evidence, `prompts/**` needs an LLM red-team. `evaluate --base origin/main` then **requires** exactly those kinds, so a CSS-only change isn't held up by a red-team, and an API change can't ship without a contract check. The plan is saved in the decision record, so "why was this check required?" always has an answer.
+
+```yaml
+triggers:                     # override the defaults per kind
+  llm: ["src/assistant/**", "prompts/**"]
+  contract: ["api/openapi.yaml"]
+```
+
 Missing evidence is never treated as a pass. Required kinds that are missing **block** by default, and optional kinds without evidence are listed as **not tested**.
 
 ## See it decide
@@ -104,7 +118,8 @@ rules:                                      # override any rule: block | needs_h
 
 | Tool | What it does |
 |---|---|
-| `evaluate_release` | The verdict, every finding with its evidence, what wasn't tested; writes `release-decision.md` / `.json`. |
+| `evaluate_release` | The verdict, every finding with its evidence, what wasn't tested; with `base_ref`, change-triggered evidence is required too. Writes `release-decision.md` / `.json`. |
+| `plan_checks` | Which evidence this change needs, from the files changed since a git ref and the policy's triggers. |
 | `collect_evidence` | What evidence exists: kind, file, age, SHA-256, key numbers, missing required kinds. |
 | `list_rules` | Every rule with its default and its outcome under your policy. |
 | `init_policy` | Writes a commented starter policy (never overwrites without asking). |
@@ -114,7 +129,7 @@ The Claude Code plugin adds `/release-check`, which collects the evidence, tells
 ## In CI
 
 ```bash
-k11-release-gate-mcp evaluate --label v2.4.0
+k11-release-gate-mcp evaluate --label v2.4.0 --base origin/main
 ```
 
 It writes `release-decision.md` (the PR comment) and `release-decision.json` (the audit record), sets GitHub Actions outputs (`verdict`, `blockers`, `needs_human`, `conditions`, `report`) and exits non-zero according to `--fail-on block | needs-human | conditions | never`. See [`docs/release-gate.yml`](docs/release-gate.yml).
@@ -136,7 +151,7 @@ This puts into practice the risk-proportionate human-in-the-loop idea from the K
 
 ```bash
 python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # bin/pip on macOS/Linux
-pytest   # real evidence from all five tools, policy, determinism, CLI, MCP (10)
+pytest   # real evidence from all five tools, policy, determinism, diff-aware planning, CLI, MCP (15)
 ```
 
 ## Roadmap
@@ -144,7 +159,7 @@ pytest   # real evidence from all five tools, policy, determinism, CLI, MCP (10)
 - A GitHub Check with per-rule annotations
 - Signed decision records (Sigstore) for regulated releases
 - Approvals recorded against the decision (who signed off a `needs_human` verdict, and when)
-- The Release Readiness Agent: a Claude Code plugin that decides which checks a change needs, runs them through the K11 servers, and asks this gate for the verdict
+- The [Release Readiness Agent](https://github.com/K11-Software-Solutions/k11techlab-release-readiness-agent): a Claude Code plugin that runs the checks `plan_checks` asks for through the K11 servers and asks this gate for the verdict
 
 ---
 

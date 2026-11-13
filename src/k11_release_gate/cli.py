@@ -14,6 +14,7 @@ USAGE = f"""k11-release-gate-mcp {__version__}
 Usage:
   k11-release-gate-mcp                         start the MCP server on stdio
   k11-release-gate-mcp evaluate [options]      decide: ship | ship_with_conditions | needs_human | block
+  k11-release-gate-mcp plan --base REF         which evidence this change needs (files changed since REF)
   k11-release-gate-mcp rules                   list every rule and its outcome under the policy
   k11-release-gate-mcp init                    write a starter .qa-mcp/release-policy.yaml
   k11-release-gate-mcp --version
@@ -21,6 +22,7 @@ Usage:
 evaluate options:
   --label TEXT       release name or version shown in the report (e.g. v2.4.0)
   --policy PATH      default .qa-mcp/release-policy.yaml (built-in defaults if missing)
+  --base REF         also require evidence triggered by the files changed since REF (e.g. origin/main)
   --report-dir PATH  default .qa-mcp/release-gate
   --fail-on LEVEL    block (default) | needs-human | conditions | never
 
@@ -58,6 +60,21 @@ def main(argv: list[str] | None = None) -> int:
         for r in gate.rules_table(p):
             print(f"{r['id']:34} {r['kind']:10} {r['outcome'] + ('*' if r['overridden'] else ''):12} {r['title']}")
         return 0
+    if cmd == "plan":
+        ap = argparse.ArgumentParser(prog="k11-release-gate-mcp plan")
+        ap.add_argument("--base", default="origin/main")
+        a = ap.parse_args(argv[1:])
+        from .plan import changed_files, plan
+        try:
+            p = gate.load_policy(root)
+            result = plan(changed_files(root, a.base), gate.effective_triggers(p), p.required)
+        except ValueError as e:
+            print(f"plan failed: {e}", file=sys.stderr)
+            return 1
+        print(f"{result['changed_files']} file(s) changed since {a.base}")
+        for kind, k in result["kinds"].items():
+            print(f"  {'NEEDED ' if k['needed'] else 'skip   '} {k['label']:28} {k['why']}")
+        return 0
     if cmd == "init":
         f = root / gate.POLICY_FILE
         if f.exists():
@@ -73,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="k11-release-gate-mcp evaluate")
     ap.add_argument("--label")
     ap.add_argument("--policy")
+    ap.add_argument("--base")
     ap.add_argument("--report-dir", default=".qa-mcp/release-gate")
     ap.add_argument("--fail-on", default="block", choices=list(FAIL_ON))
     a = ap.parse_args(argv[1:])
@@ -81,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
         print("--report-dir must be inside the project", file=sys.stderr)
         return 1
     try:
-        result = gate.evaluate(root, gate.load_policy(root, a.policy), a.label)
+        result = gate.evaluate(root, gate.load_policy(root, a.policy), a.label, base=a.base)
     except ValueError as e:
         print(f"release gate failed: {e}", file=sys.stderr)
         return 1

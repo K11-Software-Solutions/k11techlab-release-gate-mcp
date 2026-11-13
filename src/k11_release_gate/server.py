@@ -46,13 +46,29 @@ def create_server() -> FastMCP:
                 "missing_required": [k for k in p.required if k not in present],
                 "not_present": [LABELS[k] for k in LABELS if k not in present]}
 
-    @mcp.tool(title="Evaluate release")
-    def evaluate_release(label: Optional[str] = None, write_report: bool = True) -> dict:
-        """Decide whether to release: ship | ship_with_conditions | needs_human (named approvers) | block, with every
-        rule that fired, the evidence it came from, and what wasn't tested. Writes release-decision.md/.json."""
+    @mcp.tool(title="Plan checks for a change")
+    def plan_checks(base_ref: str = "origin/main", include_uncommitted: bool = True) -> dict:
+        """Which kinds of evidence this change needs, from the files changed since base_ref and the policy's triggers
+        (plus kinds the policy always requires), with the matching files and the K11 tool that produces each."""
+        from .plan import changed_files, plan
+
         root = project_root()
-        result = gate.evaluate(root, gate.load_policy(root), label)
+        p = gate.load_policy(root)
+        files = changed_files(root, base_ref, include_uncommitted)
+        out = plan(files, gate.effective_triggers(p), p.required)
+        out["base"] = base_ref
+        return out
+
+    @mcp.tool(title="Evaluate release")
+    def evaluate_release(label: Optional[str] = None, base_ref: Optional[str] = None, write_report: bool = True) -> dict:
+        """Decide whether to release: ship | ship_with_conditions | needs_human (named approvers) | block, with every
+        rule that fired, the evidence it came from, and what wasn't tested. With base_ref, evidence kinds triggered by
+        the changed files become required too. Writes release-decision.md/.json."""
+        root = project_root()
+        result = gate.evaluate(root, gate.load_policy(root), label, base=base_ref)
         out = {k: result[k] for k in ("verdict", "label", "commit", "approvers", "counts", "findings", "not_tested")}
+        if result.get("plan"):
+            out["required_by_change"] = result["plan"]["needed"]
         out["evidence"] = [{"kind": e["kind"], "path": e["path"], "age_hours": e["age_hours"], "sha256": e["sha256"][:12]}
                            for e in result["evidence"]]
         if write_report:

@@ -146,7 +146,7 @@ def test_mcp(rc, monkeypatch):
             info = await c.initialize()
             assert (info.serverInfo.name, info.serverInfo.version) == ("k11-release-gate", __version__)
             names = sorted(t.name for t in (await c.list_tools()).tools)
-            assert names == ["collect_evidence", "evaluate_release", "init_policy", "list_rules"]
+            assert names == ["collect_evidence", "evaluate_release", "init_policy", "list_rules", "plan_checks"]
 
             def j(r):
                 assert not r.isError, r.content[0].text

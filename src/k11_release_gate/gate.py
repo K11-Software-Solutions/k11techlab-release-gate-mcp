@@ -141,6 +141,7 @@ class Policy:
     critical_consumers: list[str] = field(default_factory=lambda: ["critical", "high"])
     approvers: list[str] = field(default_factory=list)
     overrides: dict[str, str] = field(default_factory=dict)
+    triggers: dict[str, list[str]] = field(default_factory=dict)  # kind -> file patterns that make it needed
     source: str = "built-in defaults"
     sha256: str = ""
 
@@ -148,7 +149,7 @@ class Policy:
         return self.overrides.get(rule_id, RULE_IDS[rule_id].default)
 
 
-POLICY_KEYS = {"name", "evidence", "required", "max_age_hours", "critical_consumers", "approvers", "rules"}
+POLICY_KEYS = {"name", "evidence", "required", "max_age_hours", "critical_consumers", "approvers", "rules", "triggers"}
 
 
 def parse_policy(text: str, source: str) -> Policy:
@@ -179,6 +180,17 @@ def parse_policy(text: str, source: str) -> Policy:
     p.max_age_hours = float(data.get("max_age_hours", p.max_age_hours))
     p.critical_consumers = list(data.get("critical_consumers", p.critical_consumers))
     p.approvers = list(data.get("approvers", p.approvers) or [])
+    from .plan import DEFAULT_TRIGGERS
+    p.triggers = {k: list(v) for k, v in DEFAULT_TRIGGERS.items()}
+    if "triggers" in data:
+        tr = data["triggers"] or {}
+        bad = set(tr) - set(KINDS)
+        if bad:
+            raise ValueError(f"{source}: unknown trigger kind(s) {sorted(bad)}; known: {list(KINDS)}")
+        for k, v in tr.items():
+            p.triggers[k] = [v] if isinstance(v, str) else list(v or [])
+            if k not in p.evidence:
+                raise ValueError(f"{source}: trigger kind '{k}' has no evidence patterns")
     for rid, outcome in (data.get("rules") or {}).items():
         if rid not in RULE_IDS:
             raise ValueError(f"{source}: unknown rule '{rid}'. Use list_rules to see them.")
@@ -209,6 +221,9 @@ def default_policy_text() -> str:
               "# Consumer criticalities (from consumers.yaml) whose breakage blocks a release.",
               "critical_consumers: [critical, high]", "",
               "# Who signs off when the verdict is needs_human.", "approvers: []", "",
+              "# With --base/base_ref, a kind also becomes required when a changed file matches its triggers.",
+              "# Defaults cover common layouts; override per kind, e.g.:",
+              "# triggers:", "#   llm: [\"src/assistant/**\", \"prompts/**\"]", "",
               "# Change a rule's outcome: block | needs_human | conditional | info | off", "rules:",
               "  # llm.medium: needs_human", "  # ui.healed: info", ""]
     return "\n".join(lines)
@@ -228,9 +243,23 @@ def _git_commit(root: Path) -> str | None:
         return None
 
 
-def evaluate(root: Path, policy: Policy, label: str | None = None, now: datetime | None = None) -> dict[str, Any]:
+def effective_triggers(policy: Policy) -> dict[str, list[str]]:
+    from .plan import DEFAULT_TRIGGERS
+    return policy.triggers or {k: list(v) for k, v in DEFAULT_TRIGGERS.items()}
+
+
+def evaluate(root: Path, policy: Policy, label: str | None = None, now: datetime | None = None,
+             base: str | None = None) -> dict[str, Any]:
+    """With ``base`` (a git ref), kinds triggered by the changed files become required too."""
     now = now or datetime.now(timezone.utc)
     root = Path(root).resolve()
+    change_plan = None
+    required = list(policy.required)
+    if base:
+        from .plan import changed_files, plan as make_plan
+        change_plan = make_plan(changed_files(root, base), effective_triggers(policy), policy.required)
+        change_plan["base"] = base
+        required = [k for k in KINDS if k in change_plan["needed"]]
     evidence = collect(root, policy.evidence, now)
     findings: list[Finding] = []
 
@@ -240,9 +269,12 @@ def evaluate(root: Path, policy: Policy, label: str | None = None, now: datetime
             findings.append(Finding(rule_id, outcome, kind, message, path, details or []))
 
     present = {e.kind for e in evidence if not e.error}
-    for kind in policy.required:
+    for kind in required:
         if kind not in present:
-            add("evidence.missing", kind, f"No {LABELS[kind]} evidence found (looked in {', '.join(policy.evidence[kind])})")
+            why = "" if kind in policy.required or not change_plan else \
+                f" — needed because {change_plan['kinds'][kind]['matched_count']} changed file(s) match its triggers"
+            add("evidence.missing", kind, f"No {LABELS[kind]} evidence found (looked in {', '.join(policy.evidence.get(kind, []))}){why}",
+                details=change_plan['kinds'][kind]['matched_files'] if change_plan and kind not in policy.required else [])
     for e in evidence:
         if e.error:
             add("evidence.unreadable", e.kind, f"{e.path} couldn't be read: {e.error}", e.path)
@@ -257,7 +289,7 @@ def evaluate(root: Path, policy: Policy, label: str | None = None, now: datetime
 
     worst = min((f.outcome for f in findings), key=lambda o: RANK[o], default="info")
     verdict = VERDICT[worst]
-    not_tested = [k for k in KINDS if k not in present and k not in policy.required]
+    not_tested = [k for k in KINDS if k not in present and k not in required]
     findings.sort(key=lambda f: (RANK[f.outcome], KINDS.index(f.kind) if f.kind in KINDS else 9, f.rule))
     return {
         "tool": f"k11-release-gate-mcp {__version__}",
@@ -272,6 +304,7 @@ def evaluate(root: Path, policy: Policy, label: str | None = None, now: datetime
         "findings": [f.__dict__ for f in findings],
         "evidence": [e.__dict__ for e in evidence],
         "not_tested": not_tested,
+        "plan": change_plan,
     }
 
 

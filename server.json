@@ -8,12 +8,12 @@
     "url": "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "k11-release-gate-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },

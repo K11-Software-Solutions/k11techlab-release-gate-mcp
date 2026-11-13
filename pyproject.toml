@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "k11-release-gate-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server and CI gate for release decisions: combines UI healing, API contract, API functional, LLM red-team and JUnit evidence under a written policy into ship / conditions / needs a person / block, with an audit trail."
 readme = "README.md"
 license = "MIT"

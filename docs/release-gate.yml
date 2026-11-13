@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the base branch is needed to see what changed
 
       # Bring in the reports your test jobs produced (one artifact per tool, or all in one).
       - uses: actions/download-artifact@v4
@@ -32,7 +34,7 @@ jobs:
 
       - name: Decide
         id: gate
-        run: k11-release-gate-mcp evaluate --label "${{ github.head_ref || github.ref_name }}" --fail-on never
+        run: k11-release-gate-mcp evaluate --label "${{ github.head_ref || github.ref_name }}" --base "origin/${{ github.base_ref || 'main' }}" --fail-on never
 
       - name: Post the decision
         uses: marocchino/sticky-pull-request-comment@v2

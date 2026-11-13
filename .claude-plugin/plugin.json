@@ -1,6 +1,6 @@
 {
   "name": "release-gate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "One release decision from all your QA evidence (UI healing, API contract, API functional, LLM red-team, JUnit) under a written policy: ship, ship with conditions, needs a person, or block, with an audit trail.",
   "author": {
     "name": "Kavita A. Jadhav",
