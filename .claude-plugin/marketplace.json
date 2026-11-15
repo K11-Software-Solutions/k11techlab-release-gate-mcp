@@ -1,5 +1,6 @@
 {
   "name": "k11-release-gate",
+  "description": "k11 Release Gate: one deterministic release decision from UI, API, LLM, performance and JUnit evidence under a written policy.",
   "owner": {
     "name": "K11 Software Solutions",
     "url": "https://k11softwaresolutions.com"
@@ -8,7 +9,7 @@
     {
       "name": "release-gate",
       "source": "./",
-      "description": "Release decisions from QA evidence under a written policy, with an audit trail."
+      "description": "Release decisions from QA evidence (UI, API contract, API functional, LLM, performance, JUnit) under a written policy, with an audit trail."
     }
   ]
 }

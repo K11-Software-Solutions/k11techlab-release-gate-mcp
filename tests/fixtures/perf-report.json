@@ -1,0 +1,449 @@
+{
+  "tool": "k11-performance-qa-mcp 0.1.0",
+  "generatedAt": "2026-11-15T19:59:53+00:00",
+  "environment": "local",
+  "scenario": "browse",
+  "engine": "builtin",
+  "profile": {
+    "vus": 4,
+    "duration_s": 6.0,
+    "ramp_up_s": 0.0,
+    "think_time_ms": 20.0,
+    "max_rps": null
+  },
+  "status": "completed",
+  "reason": "",
+  "started_at": "2026-11-15T19:59:47+00:00",
+  "duration_s": 6.12,
+  "summary": {
+    "requests": 423,
+    "errors": 7,
+    "error_rate": 0.0165,
+    "server_errors": 7,
+    "check_failures": 2,
+    "rps": 69.12,
+    "iterations": 108,
+    "min": 2.0,
+    "avg": 48.4,
+    "p50": 28.0,
+    "p90": 102.0,
+    "p95": 108.0,
+    "p99": 141.7,
+    "max": 224.0,
+    "endpoints": 4,
+    "slo_breaches": 1,
+    "regressions": 1,
+    "verdict": "fail"
+  },
+  "endpoints": [
+    {
+      "endpoint": "DELETE /orders/{id}",
+      "requests": 50,
+      "errors": 0,
+      "error_rate": 0.0,
+      "server_errors": 0,
+      "check_failures": 0,
+      "rps": 8.17,
+      "status_codes": {
+        "204": 25,
+        "404": 25
+      },
+      "min": 2.0,
+      "avg": 8.4,
+      "p50": 5.0,
+      "p90": 17.3,
+      "p95": 27.0,
+      "p99": 50.2,
+      "max": 59.0
+    },
+    {
+      "endpoint": "GET /orders",
+      "requests": 76,
+      "errors": 0,
+      "error_rate": 0.0,
+      "server_errors": 0,
+      "check_failures": 0,
+      "rps": 12.42,
+      "status_codes": {
+        "200": 76
+      },
+      "min": 2.0,
+      "avg": 12.7,
+      "p50": 6.0,
+      "p90": 28.0,
+      "p95": 31.0,
+      "p99": 69.8,
+      "max": 81.0
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "requests": 189,
+      "errors": 7,
+      "error_rate": 0.037,
+      "server_errors": 7,
+      "check_failures": 2,
+      "rps": 30.88,
+      "status_codes": {
+        "200": 182,
+        "500": 7
+      },
+      "min": 82.0,
+      "avg": 92.8,
+      "p50": 84.0,
+      "p90": 109.0,
+      "p95": 120.6,
+      "p99": 181.5,
+      "max": 224.0
+    },
+    {
+      "endpoint": "POST /orders",
+      "requests": 108,
+      "errors": 0,
+      "error_rate": 0.0,
+      "server_errors": 0,
+      "check_failures": 0,
+      "rps": 17.65,
+      "status_codes": {
+        "201": 108
+      },
+      "min": 5.0,
+      "avg": 14.2,
+      "p50": 7.0,
+      "p90": 25.0,
+      "p95": 34.0,
+      "p99": 65.8,
+      "max": 143.0
+    }
+  ],
+  "slos": [
+    {
+      "endpoint": "DELETE /orders/{id}",
+      "slo": "p95_ms",
+      "pattern": "*",
+      "target": 800,
+      "actual": 27.0,
+      "ok": true
+    },
+    {
+      "endpoint": "DELETE /orders/{id}",
+      "slo": "error_rate",
+      "pattern": "*",
+      "target": 0.02,
+      "actual": 0.0,
+      "ok": true
+    },
+    {
+      "endpoint": "GET /orders",
+      "slo": "p95_ms",
+      "pattern": "*",
+      "target": 800,
+      "actual": 31.0,
+      "ok": true
+    },
+    {
+      "endpoint": "GET /orders",
+      "slo": "error_rate",
+      "pattern": "*",
+      "target": 0.02,
+      "actual": 0.0,
+      "ok": true
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "slo": "p95_ms",
+      "pattern": "GET /orders/{id}",
+      "target": 250,
+      "actual": 120.6,
+      "ok": true
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "slo": "error_rate",
+      "pattern": "GET /orders/{id}",
+      "target": 0.01,
+      "actual": 0.037,
+      "ok": false
+    },
+    {
+      "endpoint": "POST /orders",
+      "slo": "p95_ms",
+      "pattern": "*",
+      "target": 800,
+      "actual": 34.0,
+      "ok": true
+    },
+    {
+      "endpoint": "POST /orders",
+      "slo": "error_rate",
+      "pattern": "*",
+      "target": 0.02,
+      "actual": 0.0,
+      "ok": true
+    }
+  ],
+  "baseline": ".qa-mcp/perf-baseline/browse-local.json",
+  "comparison": {
+    "baseline_generated_at": "2026-11-15T19:59:47+00:00",
+    "baseline_engine": "builtin",
+    "baseline_environment": "local",
+    "metric": "p95",
+    "tolerance_pct": 15.0,
+    "min_delta_ms": 15.0,
+    "min_samples": 30,
+    "p_value": 0.01,
+    "endpoints": [
+      {
+        "endpoint": "DELETE /orders/{id}",
+        "metric": "p95",
+        "baseline": 62.0,
+        "current": 27.0,
+        "delta_ms": -35.0,
+        "delta_pct": -56.5,
+        "samples": [
+          104,
+          50
+        ],
+        "p_value": 0.63882,
+        "status": "unchanged",
+        "error_rate": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "endpoint": "GET /orders",
+        "metric": "p95",
+        "baseline": 138.9,
+        "current": 31.0,
+        "delta_ms": -107.9,
+        "delta_pct": -77.7,
+        "samples": [
+          138,
+          76
+        ],
+        "p_value": 0.987338,
+        "status": "unchanged",
+        "error_rate": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "endpoint": "GET /orders/{id}",
+        "metric": "p95",
+        "baseline": 57.6,
+        "current": 120.6,
+        "delta_ms": 63.0,
+        "delta_pct": 109.4,
+        "samples": [
+          328,
+          189
+        ],
+        "p_value": 0.0,
+        "status": "regression",
+        "error_rate": [
+          0.0,
+          0.037
+        ],
+        "error_rate_regression": 0.037
+      },
+      {
+        "endpoint": "POST /orders",
+        "metric": "p95",
+        "baseline": 98.0,
+        "current": 34.0,
+        "delta_ms": -64.0,
+        "delta_pct": -65.3,
+        "samples": [
+          190,
+          108
+        ],
+        "p_value": 0.0,
+        "status": "improvement",
+        "error_rate": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "regressions": [
+      {
+        "endpoint": "GET /orders/{id}",
+        "metric": "p95",
+        "baseline": 57.6,
+        "current": 120.6,
+        "delta_ms": 63.0,
+        "delta_pct": 109.4,
+        "samples": [
+          328,
+          189
+        ],
+        "p_value": 0.0,
+        "status": "regression",
+        "error_rate": [
+          0.0,
+          0.037
+        ],
+        "error_rate_regression": 0.037
+      }
+    ],
+    "improvements": [
+      {
+        "endpoint": "POST /orders",
+        "metric": "p95",
+        "baseline": 98.0,
+        "current": 34.0,
+        "delta_ms": -64.0,
+        "delta_pct": -65.3,
+        "samples": [
+          190,
+          108
+        ],
+        "p_value": 0.0,
+        "status": "improvement",
+        "error_rate": [
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "insufficient_samples": [],
+    "error_rate_regressions": [
+      {
+        "endpoint": "GET /orders/{id}",
+        "metric": "p95",
+        "baseline": 57.6,
+        "current": 120.6,
+        "delta_ms": 63.0,
+        "delta_pct": 109.4,
+        "samples": [
+          328,
+          189
+        ],
+        "p_value": 0.0,
+        "status": "regression",
+        "error_rate": [
+          0.0,
+          0.037
+        ],
+        "error_rate_regression": 0.037
+      }
+    ],
+    "missing_endpoints": []
+  },
+  "findings": [
+    {
+      "type": "server_errors",
+      "endpoint": "GET /orders/{id}",
+      "message": "GET /orders/{id}: 7 server error(s) (5xx) under load"
+    },
+    {
+      "type": "slo_breach",
+      "endpoint": "GET /orders/{id}",
+      "message": "GET /orders/{id}: error_rate 3.70% misses the SLO (1.00%)"
+    },
+    {
+      "type": "regression",
+      "endpoint": "GET /orders/{id}",
+      "message": "GET /orders/{id}: p95 57.6 \u2192 120.6 ms (+109.4%, p=0.0000)"
+    },
+    {
+      "type": "error_rate_regression",
+      "endpoint": "GET /orders/{id}",
+      "message": "GET /orders/{id}: error rate 0.00% \u2192 3.70%"
+    }
+  ],
+  "flows": [
+    {
+      "file": "tests/api/view_order.yaml",
+      "name": "Customer views an order and their order history",
+      "weight": 3.0,
+      "http_steps": 4,
+      "db_steps_skipped": 0
+    },
+    {
+      "file": "tests/api/cancel_order.yaml",
+      "name": "Customer cancels an order and it is soft-deleted",
+      "weight": 1.0,
+      "http_steps": 4,
+      "db_steps_skipped": 2
+    }
+  ],
+  "error_examples": [
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug; $.status pending: missing"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug; $.status pending: missing"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug"
+    },
+    {
+      "endpoint": "GET /orders/{id}",
+      "status": 500,
+      "error": "status 200: got 500; no server error: HTTP 500: a 5xx is a bug"
+    }
+  ],
+  "timeline": [
+    {
+      "second": 0,
+      "requests": 70,
+      "errors": 1
+    },
+    {
+      "second": 1,
+      "requests": 62,
+      "errors": 1
+    },
+    {
+      "second": 2,
+      "requests": 70,
+      "errors": 1
+    },
+    {
+      "second": 3,
+      "requests": 72,
+      "errors": 1
+    },
+    {
+      "second": 4,
+      "requests": 74,
+      "errors": 2
+    },
+    {
+      "second": 5,
+      "requests": 71,
+      "errors": 1
+    },
+    {
+      "second": 6,
+      "requests": 4,
+      "errors": 0
+    }
+  ],
+  "notes": [
+    "Database steps are skipped under load; they still run in API functional tests."
+  ]
+}

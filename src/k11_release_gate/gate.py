@@ -34,6 +34,7 @@ DEFAULT_EVIDENCE = {
     "contract": [".qa-mcp/contract-report/contract-report.json"],
     "api_tests": [".qa-mcp/api-test-report/api-test-report.json"],
     "llm": ["llm-assure-report/assessment.json", ".qa-mcp/llm-assure/assessment.json"],
+    "perf": [".qa-mcp/perf-report/perf-report.json"],
     "junit": ["test-results/**/*.xml", "**/surefire-reports/TEST-*.xml", "junit*.xml"],
 }
 
@@ -116,6 +117,27 @@ RULES: list[Rule] = [
     Rule("llm.inconclusive", "llm", "needs_human", "LLM probes that need review or errored",
          lambda f, p: [(f"{_n(f['needs_review'] + f['errors'], 'LLM probe')} inconclusive (needs review or error)", [])]
          if f.get("needs_review") or f.get("errors") else []),
+    # Performance (load tests)
+    Rule("perf.not_run", "perf", "needs_human", "The load test was refused by guardrails or failed to start",
+         lambda f, p: [(f"Load test didn't run: {f.get('reason') or f.get('status')}", [])]
+         if f.get("status") in ("blocked", "error") else []),
+    Rule("perf.aborted", "perf", "block", "The load test stopped because too many requests failed",
+         lambda f, p: [(f"Load test aborted: {f.get('reason')}", [])] if f.get("status") == "aborted" else []),
+    Rule("perf.server_errors", "perf", "block", "Server errors (5xx) under load",
+         lambda f, p: [(f"Server errors under load on {_n(len(f['server_errors']), 'endpoint')}", f["server_errors"])]
+         if f.get("server_errors") else []),
+    Rule("perf.slo_breached", "perf", "block", "An endpoint missed a latency, error-rate or throughput SLO",
+         lambda f, p: [(f"{_n(len(f['slo_breaches']), 'SLO')} missed under load", f["slo_breaches"])]
+         if f.get("slo_breaches") else []),
+    Rule("perf.regression", "perf", "needs_human", "Significantly slower (or more errors) than the baseline",
+         lambda f, p: [(f"{_n(len(f['regressions']), 'performance regression')} against the baseline", f["regressions"])]
+         if f.get("regressions") else []),
+    Rule("perf.no_baseline", "perf", "info", "No baseline to compare with, so regressions can't be detected",
+         lambda f, p: [("No performance baseline: save one from main to catch regressions", [])]
+         if f.get("status") == "completed" and not f.get("has_baseline") else []),
+    Rule("perf.insufficient_samples", "perf", "info", "Too few requests to compare some endpoints with the baseline",
+         lambda f, p: [(f"{_n(f['insufficient_samples'], 'endpoint')} had too few samples to compare", [])]
+         if f.get("insufficient_samples") else []),
     # Any JUnit suite
     Rule("junit.failures", "junit", "block", "Test failures or errors in a JUnit report",
          lambda f, p: [(f"{_n(f['failures'] + f['errors'], 'test')} failed", f["failed_tests"])]

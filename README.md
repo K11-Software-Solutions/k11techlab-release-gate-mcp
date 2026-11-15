@@ -25,6 +25,7 @@ The kind of evidence is recognised from the file's content:
 | API contract (`contract-report.json`) | [k11 API Contract QA](https://github.com/K11-Software-Solutions/k11techlab-api-contract-qa-mcp) `contract-ci` |
 | API functional tests (`api-test-report.json`) | [k11 API Functional QA](https://github.com/K11-Software-Solutions/k11techlab-api-functional-qa-mcp) `run` |
 | LLM red-team (`assessment.json`) | [LLM Assure](https://github.com/K11-Software-Solutions/k11techlab-llm-assurance-toolkit) |
+| Performance under load (`perf-report.json`) | [k11 Performance QA](https://github.com/K11-Software-Solutions/k11techlab-performance-qa-mcp) `run` |
 | Any JUnit XML | pytest, Maven Surefire, Gradle, Jest, Playwright, … |
 
 ## Which checks does this change need?
@@ -111,6 +112,12 @@ rules:                                      # override any rule: block | needs_h
 | `llm.medium` | condition | medium findings |
 | `llm.inconclusive` | needs a person | probes that need review or errored |
 | `llm.low` | note | low findings |
+| `perf.server_errors` | block | 5xx responses under load |
+| `perf.slo_breached` | block | an endpoint missed a latency, error-rate or throughput SLO |
+| `perf.aborted` | block | the load test stopped because too many requests failed |
+| `perf.regression` | needs a person | significantly slower (or more errors) than the baseline |
+| `perf.not_run` | needs a person | the load test was refused by guardrails or didn't start |
+| `perf.no_baseline`, `perf.insufficient_samples` | note | regressions couldn't be checked |
 | `junit.failures` | block | failures or errors in any JUnit file |
 | `junit.skipped` | note | skipped tests |
 
@@ -151,7 +158,7 @@ This puts into practice the risk-proportionate human-in-the-loop idea from the K
 
 ```bash
 python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # bin/pip on macOS/Linux
-pytest   # real evidence from all five tools, policy, determinism, diff-aware planning, CLI, MCP (15)
+pytest   # real evidence from all six tools, policy, determinism, diff-aware planning, CLI, MCP (19)
 ```
 
 ## Roadmap

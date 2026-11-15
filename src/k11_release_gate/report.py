@@ -26,6 +26,11 @@ def _summary_cell(e: dict) -> str:
                 f"{len(f['other_failures'])} other failure(s)")
     if k == "llm":
         return (f"grade {f['grade']}, critical {f['critical']}, high {f['high']}, medium {f['medium']}, low {f['low']}")
+    if k == "perf":
+        if f.get("status") != "completed":
+            return f"{f.get('status')}: {f.get('reason', '')}"[:120]
+        return (f"{f['requests']} requests, p95 {f['p95']} ms, error rate {f['error_rate']:.2%}, "
+                f"{len(f['slo_breaches'])} SLO miss(es), {len(f['regressions'])} regression(s)")
     if k == "junit":
         return f"{f['tests']} tests, {f['failures'] + f['errors']} failed, {f['skipped']} skipped"
     return ""

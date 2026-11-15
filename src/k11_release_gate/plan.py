@@ -26,12 +26,16 @@ DEFAULT_TRIGGERS: dict[str, list[str]] = {
                 "**/components/**", "**/pages/**", "**/templates/**", "**/views/**", "tests/e2e/**", "tests/ui/**"],
     "llm": ["**/prompts/**", "**/*.prompt", "**/*prompt*.md", "**/*prompt*.txt", "**/llm/**", "**/agents/**",
             "**/rag/**", "**/guardrails/**", "**/chatbot/**"],
+    "perf": ["**/migrations/**", "**/*.sql", "**/queries/**", "**/repositories/**", "**/repository/**", "**/dao/**",
+             "**/cache/**", "**/caching/**", "**/db/**", "**/database/**", "**/perf/**", "tests/perf/**",
+             ".qa-mcp/perf.yaml", "**/*.k6.js", "**/k6/**", "**/nginx*.conf", "**/gunicorn*.py", "**/pool*.yaml"],
 }
 HOW = {
     "ui_heal": "k11 Playwright QA or Selenium QA: heal-ci (or run_tests + heal_locator)",
     "contract": "k11 API Contract QA: contract-ci (or assess_impact with write_report)",
     "api_tests": "k11 API Functional QA: run (or run_flows)",
     "llm": "LLM Assure: llm-assure run (or run_assessment)",
+    "perf": "k11 Performance QA: k11-performance-qa-mcp run (or run_load_test)",
     "junit": "your existing test suites with JUnit XML output",
 }
 REF = re.compile(r"^[\w./~^@{}-]+$")

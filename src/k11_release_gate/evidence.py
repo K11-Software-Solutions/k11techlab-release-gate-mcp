@@ -5,6 +5,7 @@ Kinds, recognised from their content (not their file name):
   contract    contract-report.json from k11 API Contract QA (contract-ci)
   api_tests   api-test-report.json from k11 API Functional QA
   llm         assessment.json from LLM Assure (k11-llm-assure-mcp)
+  perf        perf-report.json from k11 Performance QA (load tests, SLOs, regressions)
   junit       any JUnit XML (pytest, Maven Surefire, Gradle, Jest, Playwright, ...)
 
 Each file becomes an Evidence record with its SHA-256, timestamp, age and a small set of
@@ -22,9 +23,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-KINDS = ("ui_heal", "contract", "api_tests", "llm", "junit")
+KINDS = ("ui_heal", "contract", "api_tests", "llm", "perf", "junit")
 LABELS = {"ui_heal": "UI tests (self-healing)", "contract": "API contract", "api_tests": "API functional tests",
-          "llm": "LLM red-team", "junit": "Test suites (JUnit)"}
+          "llm": "LLM red-team", "perf": "Performance (load tests)", "junit": "Test suites (JUnit)"}
 MAX_BYTES = 50 * 1024 * 1024
 
 
@@ -54,6 +55,8 @@ def detect(data: Any) -> str | None:
     if not isinstance(data, dict):
         return None
     tool = str(data.get("tool", ""))
+    if tool.startswith("k11-performance-qa-mcp") or ("endpoints" in data and "slos" in data and "findings" in data):
+        return "perf"
     if "heal-ci" in tool or ("items" in data and isinstance(data.get("counts"), dict) and "applied" in data["counts"]):
         return "ui_heal"
     if tool.startswith("k11-api-contract-qa-mcp") or ("impact" in data and "changes" in data):
@@ -115,6 +118,21 @@ def _facts(kind: str, d: dict) -> tuple[dict, str | None, str]:
                  "top_findings": [{"probe": r.get("probe_id"), "name": r.get("probe_name"), "severity": r.get("severity"),
                                    "suite": r.get("suite")} for r in failed[:200]]},
                 d.get("finished_at") or d.get("started_at"), f"llm-assure {d.get('toolkit_version', '')}".strip())
+    if kind == "perf":
+        s = d.get("summary") or {}
+        fs = d.get("findings") or []
+
+        def msgs(*types: str) -> list[str]:
+            return [f.get("message", "") for f in fs if f.get("type") in types][:20]
+
+        return ({"environment": d.get("environment"), "scenario": d.get("scenario"), "engine": d.get("engine"),
+                 "status": d.get("status"), "reason": d.get("reason", ""), "requests": s.get("requests", 0),
+                 "error_rate": s.get("error_rate", 0), "p95": s.get("p95"), "verdict": s.get("verdict"),
+                 "server_errors": msgs("server_errors"), "slo_breaches": msgs("slo_breach"),
+                 "regressions": msgs("regression", "error_rate_regression"),
+                 "insufficient_samples": len([f for f in fs if f.get("type") == "insufficient_samples"]),
+                 "has_baseline": d.get("comparison") is not None},
+                d.get("generatedAt"), str(d.get("tool", "")))
     return {}, None, ""
 
 
