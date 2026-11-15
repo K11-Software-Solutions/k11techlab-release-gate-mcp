@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "k11 Release Gate MCP Server"
+abstract: "MCP server and CI gate that turns UI, API contract, API functional, LLM red-team and JUnit evidence into one deterministic release decision under a written policy (ship, ship with conditions, needs a named person, or block), with diff-aware planning and an audit record that links every reason to its evidence file and SHA-256."
+authors:
+  - family-names: "Jadhav"
+    given-names: "Kavita"
+    orcid: "https://orcid.org/0009-0009-8507-4976"
+    affiliation: "K11 Software Solutions"
+repository-code: "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp"
+url: "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp"
+license: MIT
+keywords:
+  - "release management"
+  - "quality gate"
+  - "human-in-the-loop"
+  - "audit"
+  - "CI/CD"
+  - "release readiness"
+  - "model context protocol"
+references:
+  - type: article
+    title: "Autonomous CI/CD Quality Assurance Using LangGraph Multi-Agent Orchestration and Risk-Proportionate Human-in-the-Loop Control"
+    authors:
+      - family-names: "Jadhav"
+        given-names: "Kavita"
+        orcid: "https://orcid.org/0009-0009-8507-4976"
+    journal: "International Journal of Engineering and Computer Science"
+    year: 2026
+    doi: "10.18535/ijecs/v15i06.5563"

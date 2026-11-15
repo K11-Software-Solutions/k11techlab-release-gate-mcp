@@ -1,0 +1,36 @@
+{
+  "title": "k11 Release Gate MCP Server",
+  "upload_type": "software",
+  "description": "<p>MCP server and CI gate that turns UI, API contract, API functional, LLM red-team and JUnit evidence into one deterministic release decision under a written policy (ship, ship with conditions, needs a named person, or block), with diff-aware planning and an audit record that links every reason to its evidence file and SHA-256.</p><p>Source code: <a href=\"https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp\">https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp</a></p>",
+  "creators": [
+    {
+      "name": "Jadhav, Kavita",
+      "orcid": "0009-0009-8507-4976",
+      "affiliation": "K11 Software Solutions"
+    }
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": [
+    "release management",
+    "quality gate",
+    "human-in-the-loop",
+    "audit",
+    "CI/CD",
+    "release readiness",
+    "model context protocol"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/K11-Software-Solutions/k11techlab-release-gate-mcp",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.18535/ijecs/v15i06.5563",
+      "relation": "isSupplementTo",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    }
+  ]
+}
