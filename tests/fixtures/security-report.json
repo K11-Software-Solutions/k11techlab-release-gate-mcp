@@ -1,0 +1,546 @@
+{
+  "tool": "k11-api-security-qa-mcp 0.1.0",
+  "generatedAt": "2026-11-17T03:19:43+00:00",
+  "status": "completed",
+  "reason": "",
+  "environment": "local",
+  "spec": "openapi.yaml",
+  "api": {
+    "checks": [
+      "auth",
+      "bola",
+      "bfla",
+      "mass_assignment",
+      "data_exposure",
+      "headers",
+      "errors",
+      "rate_limit"
+    ],
+    "operations": 11,
+    "identities": [
+      "alice",
+      "bob",
+      "admin"
+    ],
+    "tests": [
+      {
+        "check": "auth",
+        "endpoint": "DELETE /users/{id}",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "DELETE /users/{id}",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /users/me",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /users/me",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /reports",
+        "name": "rejects no credentials",
+        "outcome": "failed",
+        "detail": "HTTP 200"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /reports",
+        "name": "rejects invalid token",
+        "outcome": "failed",
+        "detail": "HTTP 200"
+      },
+      {
+        "check": "auth",
+        "endpoint": "POST /accounts",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "POST /accounts",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /accounts/{id}",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /accounts/{id}",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "DELETE /accounts/{id}",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "DELETE /accounts/{id}",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "PATCH /accounts/{id}",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "PATCH /accounts/{id}",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /admin/stats",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "GET /admin/stats",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "DELETE /admin/users/{id}",
+        "name": "rejects no credentials",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "auth",
+        "endpoint": "DELETE /admin/users/{id}",
+        "name": "rejects invalid token",
+        "outcome": "passed",
+        "detail": "HTTP 401"
+      },
+      {
+        "check": "bola",
+        "endpoint": "GET /accounts/{id}",
+        "name": "bob can't reach alice's object",
+        "outcome": "failed",
+        "detail": "HTTP 200"
+      },
+      {
+        "check": "bola",
+        "endpoint": "PATCH /accounts/{id}",
+        "name": "bob can't reach alice's object",
+        "outcome": "passed",
+        "detail": "HTTP 404"
+      },
+      {
+        "check": "bola",
+        "endpoint": "DELETE /users/{id}",
+        "name": "another user can't reach the owner's object",
+        "outcome": "not_run",
+        "detail": "no test resource for /users/{id} (add it under resources:)"
+      },
+      {
+        "check": "bola",
+        "endpoint": "DELETE /accounts/{id}",
+        "name": "bob can't reach alice's object",
+        "outcome": "passed",
+        "detail": "HTTP 404"
+      },
+      {
+        "check": "bfla",
+        "endpoint": "GET /admin/stats",
+        "name": "normal users can't call it",
+        "outcome": "passed",
+        "detail": "HTTP 403"
+      },
+      {
+        "check": "bfla",
+        "endpoint": "DELETE /admin/users/{id}",
+        "name": "normal users can't call it",
+        "outcome": "failed",
+        "detail": "HTTP 404"
+      },
+      {
+        "check": "mass_assignment",
+        "endpoint": "POST /users",
+        "name": "privileged fields are ignored",
+        "outcome": "failed",
+        "detail": "accepted ['role']"
+      },
+      {
+        "check": "mass_assignment",
+        "endpoint": "POST /accounts",
+        "name": "privileged fields are ignored",
+        "outcome": "passed",
+        "detail": ""
+      },
+      {
+        "check": "mass_assignment",
+        "endpoint": "PATCH /accounts/{id}",
+        "name": "privileged fields are ignored",
+        "outcome": "passed",
+        "detail": ""
+      },
+      {
+        "check": "data_exposure",
+        "endpoint": "*",
+        "name": "no secrets or undocumented fields in responses",
+        "outcome": "failed",
+        "detail": "6 response(s) inspected"
+      },
+      {
+        "check": "headers",
+        "endpoint": "GET /health",
+        "name": "CORS and hardening headers",
+        "outcome": "failed",
+        "detail": ""
+      },
+      {
+        "check": "errors",
+        "endpoint": "POST /users",
+        "name": "malformed input is rejected cleanly",
+        "outcome": "failed",
+        "detail": "HTTP 500"
+      },
+      {
+        "check": "rate_limit",
+        "endpoint": "GET /accounts/{id}",
+        "name": "requests are throttled",
+        "outcome": "failed",
+        "detail": "20 requests, no 429 and no rate-limit headers"
+      }
+    ],
+    "findings": [
+      {
+        "id": "API5:2023",
+        "check": "bfla",
+        "title": "Admin-only operation callable by a normal user (alice)",
+        "severity": "critical",
+        "endpoint": "DELETE /admin/users/{id}",
+        "identity": "alice",
+        "evidence": {
+          "request": "DELETE /admin/users/u-does-not-exist",
+          "as": "alice",
+          "status": 404,
+          "response": "{\"error\": \"not found\"}"
+        },
+        "fix": "Check the caller's role in the operation itself, not only in the UI.",
+        "source": "api"
+      },
+      {
+        "id": "API1:2023",
+        "check": "bola",
+        "title": "bob can read an object that belongs to alice",
+        "severity": "high",
+        "endpoint": "GET /accounts/{id}",
+        "identity": "bob",
+        "evidence": {
+          "request": "GET /accounts/acc-f9d9c023",
+          "as": "bob",
+          "status": 200,
+          "response": "{\"id\": \"acc-f9d9c023\", \"name\": \"QA account\", \"owner\": \"u-alice\", \"balance\": 0}"
+        },
+        "fix": "Check that the caller owns (or may access) the object on every request, not just that they are logged in.",
+        "source": "api"
+      },
+      {
+        "id": "API2:2023",
+        "check": "auth",
+        "title": "Accepts a request with no credentials",
+        "severity": "high",
+        "endpoint": "GET /reports",
+        "identity": "",
+        "evidence": {
+          "request": "GET /reports",
+          "as": "anonymous",
+          "status": 200,
+          "response": "{\"accounts\": 1, \"users\": 3}"
+        },
+        "fix": "Require valid credentials on this operation (the spec says it is secured).",
+        "source": "api"
+      },
+      {
+        "id": "API2:2023",
+        "check": "auth",
+        "title": "Accepts a request with invalid token",
+        "severity": "high",
+        "endpoint": "GET /reports",
+        "identity": "",
+        "evidence": {
+          "request": "GET /reports",
+          "as": "anonymous",
+          "status": 200,
+          "response": "{\"accounts\": 1, \"users\": 3}"
+        },
+        "fix": "Require valid credentials on this operation (the spec says it is secured).",
+        "source": "api"
+      },
+      {
+        "id": "API3:2023",
+        "check": "mass_assignment",
+        "title": "Client-supplied role accepted and stored",
+        "severity": "high",
+        "endpoint": "POST /users",
+        "identity": "alice",
+        "evidence": {
+          "request": "POST /users",
+          "as": "alice",
+          "body": {
+            "email": "qa@example.com",
+            "name": "test",
+            "password": "test",
+            "role": "admin",
+            "roles": [
+              "admin"
+            ],
+            "isAdmin": true,
+            "is_admin": true,
+            "admin": true,
+            "permissions": [
+              "*"
+            ],
+            "verified": true,
+            "isVerified": true,
+            "balance": 999999,
+            "credit": 999999,
+            "price": 0.01,
+            "discount": 100,
+            "total": 0.01,
+            "status": "approved",
+            "ownerId": "k11-other-owner",
+            "userId": "k11-other-user",
+            "tenantId": "k11-other-tenant",
+            "plan": "enterprise"
+          },
+          "status": 201,
+          "response": "{\"id\": \"u-afa6f430\", \"email\": \"qa@example.com\", \"name\": \"test\", \"role\": \"admin\"}",
+          "accepted": {
+            "role": "admin"
+          }
+        },
+        "fix": "Bind requests to an explicit allow-list of fields (a request DTO); never copy the body onto the model.",
+        "source": "api"
+      },
+      {
+        "id": "API3:2023",
+        "check": "data_exposure",
+        "title": "Response contains a secret field: $.passwordHash",
+        "severity": "high",
+        "endpoint": "GET /users/me",
+        "identity": "alice",
+        "evidence": {
+          "field": "$.passwordHash"
+        },
+        "fix": "Remove the field from the response model; never serialise credentials or secrets.",
+        "source": "api"
+      },
+      {
+        "id": "API8:2023",
+        "check": "headers",
+        "title": "CORS trusts any origin with credentials (Access-Control-Allow-Origin: https://k11-evil.example)",
+        "severity": "high",
+        "endpoint": "GET /health",
+        "identity": "",
+        "evidence": {
+          "origin_sent": "https://k11-evil.example",
+          "acao": "https://k11-evil.example",
+          "credentials": true
+        },
+        "fix": "Allow only known origins; never reflect the request's Origin with credentials.",
+        "source": "api"
+      },
+      {
+        "id": "API4:2023",
+        "check": "rate_limit",
+        "title": "No rate limiting observed after 20 requests",
+        "severity": "medium",
+        "endpoint": "GET /accounts/{id}",
+        "identity": "",
+        "evidence": {},
+        "fix": "Throttle per client and per user (429 with Retry-After).",
+        "source": "api"
+      },
+      {
+        "id": "API8:2023",
+        "check": "errors",
+        "title": "Error response leaks a stack trace",
+        "severity": "medium",
+        "endpoint": "POST /users",
+        "identity": "alice",
+        "evidence": {
+          "request": "POST /users",
+          "as": "alice",
+          "status": 500,
+          "response": "Traceback (most recent call last):\n  File \"C:\\Users\\kavit\\AppData\\Local\\Temp\\k11sec\\demo\\bank\\server.py\", line 100, in _route\n    body = self._body()\n           ^^^^^^^^^^^^\n  File \"C:\\Users\\kavit\\AppData\\Local\\Temp\\k11sec\\demo\\bank\\server.py\", line 78, in _body\n    return json.loads(raw)\n          ",
+          "leak": "Traceback (most recent call last)"
+        },
+        "fix": "Validate input before processing; return a generic 400 and log details server-side.",
+        "source": "api"
+      },
+      {
+        "id": "API3:2023",
+        "check": "data_exposure",
+        "title": "Response has fields the spec doesn't document: passwordHash",
+        "severity": "low",
+        "endpoint": "GET /users/me",
+        "identity": "alice",
+        "evidence": {
+          "fields": [
+            "passwordHash"
+          ]
+        },
+        "fix": "Return only documented fields (or document them); extra fields often leak internal data.",
+        "source": "api"
+      },
+      {
+        "id": "API8:2023",
+        "check": "headers",
+        "title": "Missing X-Content-Type-Options: nosniff",
+        "severity": "low",
+        "endpoint": "GET /health",
+        "identity": "",
+        "evidence": {},
+        "fix": "Send X-Content-Type-Options: nosniff on every response.",
+        "source": "api"
+      },
+      {
+        "id": "API8:2023",
+        "check": "headers",
+        "title": "server header discloses a version: BaseHTTP/0.6 Python/3.11.0",
+        "severity": "low",
+        "endpoint": "GET /health",
+        "identity": "",
+        "evidence": {},
+        "fix": "Remove version numbers from server headers.",
+        "source": "api"
+      },
+      {
+        "id": "API2:2023",
+        "check": "auth",
+        "title": "Data-changing operation documented without authentication",
+        "severity": "info",
+        "endpoint": "POST /users",
+        "identity": "",
+        "evidence": {},
+        "fix": "Confirm this is intended (e.g. sign-up); otherwise add a security requirement to the spec and the API.",
+        "source": "api"
+      }
+    ]
+  },
+  "scanners": {
+    "files": [
+      "security-reports/semgrep.sarif"
+    ],
+    "findings": [
+      {
+        "tool": "Semgrep OSS",
+        "rule": "generic.secrets.gitleaks.generic-api-key",
+        "severity": "critical",
+        "message": "Hard-coded API key",
+        "path": "app/config.py",
+        "line": 12,
+        "fingerprint": "Semgrep OSS:key-12",
+        "status": "new",
+        "acceptance": {},
+        "file": "security-reports/semgrep.sarif"
+      },
+      {
+        "tool": "Semgrep OSS",
+        "rule": "python.flask.security.audit.debug-enabled",
+        "severity": "high",
+        "message": "Flask debug mode enabled",
+        "path": "app/main.py",
+        "line": 3,
+        "fingerprint": "Semgrep OSS:debug-3",
+        "status": "acceptance_expired",
+        "acceptance": {
+          "owner": "@platform-team",
+          "reason": "debug only in the local profile",
+          "expires": "2026-01-31"
+        },
+        "file": "security-reports/semgrep.sarif"
+      },
+      {
+        "tool": "Semgrep OSS",
+        "rule": "python.lang.security.injection.sql-injection",
+        "severity": "high",
+        "message": "User input flows into a SQL query",
+        "path": "app/accounts.py",
+        "line": 42,
+        "fingerprint": "Semgrep OSS:sqli-acc-42",
+        "status": "existing",
+        "acceptance": {},
+        "file": "security-reports/semgrep.sarif"
+      },
+      {
+        "tool": "Semgrep OSS",
+        "rule": "python.lang.security.audit.md5-used",
+        "severity": "medium",
+        "message": "MD5 is a weak hash",
+        "path": "app/legacy/checksum.py",
+        "line": 7,
+        "fingerprint": "Semgrep OSS:md5-7",
+        "status": "accepted",
+        "acceptance": {
+          "owner": "@security-lead",
+          "reason": "legacy file checksum, not used for passwords; replaced in Q1",
+          "expires": "2099-12-31"
+        },
+        "file": "security-reports/semgrep.sarif"
+      }
+    ],
+    "baseline": ".qa-mcp/security-baseline.json"
+  },
+  "notes": [],
+  "summary": {
+    "critical": 2,
+    "high": 7,
+    "medium": 2,
+    "low": 3,
+    "info": 1,
+    "verdict": "fail",
+    "api_tests": {
+      "passed": 21,
+      "failed": 9,
+      "inconclusive": 0,
+      "not_run": 1
+    },
+    "scanner": {
+      "new": 1,
+      "existing": 1,
+      "accepted": 1,
+      "acceptance_expired": 1
+    }
+  }
+}

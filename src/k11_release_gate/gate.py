@@ -35,6 +35,7 @@ DEFAULT_EVIDENCE = {
     "api_tests": [".qa-mcp/api-test-report/api-test-report.json"],
     "llm": ["llm-assure-report/assessment.json", ".qa-mcp/llm-assure/assessment.json"],
     "perf": [".qa-mcp/perf-report/perf-report.json"],
+    "security": [".qa-mcp/security-report/security-report.json"],
     "junit": ["test-results/**/*.xml", "**/surefire-reports/TEST-*.xml", "junit*.xml"],
 }
 
@@ -138,6 +139,22 @@ RULES: list[Rule] = [
     Rule("perf.insufficient_samples", "perf", "info", "Too few requests to compare some endpoints with the baseline",
          lambda f, p: [(f"{_n(f['insufficient_samples'], 'endpoint')} had too few samples to compare", [])]
          if f.get("insufficient_samples") else []),
+    # Security (API tests and scanners)
+    Rule("security.not_run", "security", "needs_human", "The security run was refused or failed",
+         lambda f, p: [(f"Security tests didn't run: {f.get('reason') or f.get('status')}", [])]
+         if f.get("status") in ("blocked", "error") else []),
+    Rule("security.critical", "security", "block", "Critical security finding (API test, or new scanner finding)",
+         lambda f, p: [(f"{_n(len(f['critical']), 'critical security finding')}", f["critical"])] if f.get("critical") else []),
+    Rule("security.high", "security", "block", "High-severity security finding (API test, or new scanner finding)",
+         lambda f, p: [(f"{_n(len(f['high']), 'high-severity security finding')}", f["high"])] if f.get("high") else []),
+    Rule("security.acceptance_expired", "security", "needs_human", "An accepted security risk has passed its expiry date",
+         lambda f, p: [(f"{_n(len(f['expired_acceptances']), 'risk acceptance')} expired: renew with a reason, or fix",
+                        f["expired_acceptances"])] if f.get("expired_acceptances") else []),
+    Rule("security.medium", "security", "conditional", "Medium-severity security finding",
+         lambda f, p: [(f"{_n(len(f['medium']), 'medium-severity security finding')}: plan a fix", f["medium"])] if f.get("medium") else []),
+    Rule("security.inconclusive", "security", "info", "Security tests that were inconclusive or not run",
+         lambda f, p: [(f"{f['tests_inconclusive']} inconclusive and {f['tests_not_run']} not-run security test(s)", [])]
+         if f.get("tests_inconclusive") or f.get("tests_not_run") else []),
     # Any JUnit suite
     Rule("junit.failures", "junit", "block", "Test failures or errors in a JUnit report",
          lambda f, p: [(f"{_n(f['failures'] + f['errors'], 'test')} failed", f["failed_tests"])]

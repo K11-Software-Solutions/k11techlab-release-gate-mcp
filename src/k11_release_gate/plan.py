@@ -29,6 +29,11 @@ DEFAULT_TRIGGERS: dict[str, list[str]] = {
     "perf": ["**/migrations/**", "**/*.sql", "**/queries/**", "**/repositories/**", "**/repository/**", "**/dao/**",
              "**/cache/**", "**/caching/**", "**/db/**", "**/database/**", "**/perf/**", "tests/perf/**",
              ".qa-mcp/perf.yaml", "**/*.k6.js", "**/k6/**", "**/nginx*.conf", "**/gunicorn*.py", "**/pool*.yaml"],
+    "security": ["**/auth/**", "**/authn/**", "**/authz/**", "**/security/**", "**/permissions/**", "**/policies/**",
+                 "**/middleware/**", "**/*auth*.py", "**/*auth*.ts", "**/*Auth*.java", "**/*Security*.java",
+                 "**/routes/**", "**/controllers/**", "**/handlers/**", "**/requirements*.txt", "**/pyproject.toml",
+                 "**/package.json", "**/package-lock.json", "**/pom.xml", "**/build.gradle*", "**/go.mod",
+                 "**/Dockerfile", ".qa-mcp/security.yaml", ".qa-mcp/security-accepted.yaml"],
 }
 HOW = {
     "ui_heal": "k11 Playwright QA or Selenium QA: heal-ci (or run_tests + heal_locator)",
@@ -36,6 +41,7 @@ HOW = {
     "api_tests": "k11 API Functional QA: run (or run_flows)",
     "llm": "LLM Assure: llm-assure run (or run_assessment)",
     "perf": "k11 Performance QA: k11-performance-qa-mcp run (or run_load_test)",
+    "security": "k11 API Security QA: k11-api-security-qa-mcp run (or run_security_tests)",
     "junit": "your existing test suites with JUnit XML output",
 }
 REF = re.compile(r"^[\w./~^@{}-]+$")

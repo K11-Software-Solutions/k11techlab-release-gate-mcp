@@ -26,6 +26,7 @@ The kind of evidence is recognised from the file's content:
 | API functional tests (`api-test-report.json`) | [k11 API Functional QA](https://github.com/K11-Software-Solutions/k11techlab-api-functional-qa-mcp) `run` |
 | LLM red-team (`assessment.json`) | [LLM Assure](https://github.com/K11-Software-Solutions/k11techlab-llm-assurance-toolkit) |
 | Performance under load (`perf-report.json`) | [k11 Performance QA](https://github.com/K11-Software-Solutions/k11techlab-performance-qa-mcp) `run` |
+| Security: OWASP API tests and scanner SARIF (`security-report.json`) | [k11 API Security QA](https://github.com/K11-Software-Solutions/k11techlab-api-security-qa-mcp) `run` |
 | Any JUnit XML | pytest, Maven Surefire, Gradle, Jest, Playwright, … |
 
 ## Which checks does this change need?
@@ -118,6 +119,11 @@ rules:                                      # override any rule: block | needs_h
 | `perf.regression` | needs a person | significantly slower (or more errors) than the baseline |
 | `perf.not_run` | needs a person | the load test was refused by guardrails or didn't start |
 | `perf.no_baseline`, `perf.insufficient_samples` | note | regressions couldn't be checked |
+| `security.critical`, `security.high` | block | API security findings, or new scanner findings, at that severity |
+| `security.acceptance_expired` | needs a person | an accepted risk passed its expiry date |
+| `security.not_run` | needs a person | the security run was refused or failed |
+| `security.medium` | condition | medium findings: plan a fix |
+| `security.inconclusive` | note | security tests that couldn't prove a result |
 | `junit.failures` | block | failures or errors in any JUnit file |
 | `junit.skipped` | note | skipped tests |
 
@@ -158,7 +164,7 @@ This puts into practice the risk-proportionate human-in-the-loop idea from the K
 
 ```bash
 python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # bin/pip on macOS/Linux
-pytest   # real evidence from all six tools, policy, determinism, diff-aware planning, CLI, MCP (19)
+pytest   # real evidence from all seven tools, policy, determinism, diff-aware planning, CLI, MCP (23)
 ```
 
 ## Roadmap

@@ -88,7 +88,7 @@ def test_policy_triggers_override_defaults(repo):
     assert plan(["prompts/x.md"], p.triggers, [])["needed"] == []           # default llm triggers replaced
     assert plan(["src/assistant/flow.py"], p.triggers, [])["needed"] == ["llm"]
     with pytest.raises(ValueError, match="unknown trigger kind"):
-        gate.parse_policy("triggers:\n  security: ['**']\n", "p.yaml")
+        gate.parse_policy("triggers:\n  accessibility: ['**']\n", "p.yaml")
 
 
 def test_cli_plan_and_evaluate_with_base(repo, monkeypatch, capsys):

@@ -6,6 +6,7 @@ Kinds, recognised from their content (not their file name):
   api_tests   api-test-report.json from k11 API Functional QA
   llm         assessment.json from LLM Assure (k11-llm-assure-mcp)
   perf        perf-report.json from k11 Performance QA (load tests, SLOs, regressions)
+  security    security-report.json from k11 API Security QA (OWASP API tests + scanner SARIF)
   junit       any JUnit XML (pytest, Maven Surefire, Gradle, Jest, Playwright, ...)
 
 Each file becomes an Evidence record with its SHA-256, timestamp, age and a small set of
@@ -23,9 +24,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-KINDS = ("ui_heal", "contract", "api_tests", "llm", "perf", "junit")
+KINDS = ("ui_heal", "contract", "api_tests", "llm", "perf", "security", "junit")
 LABELS = {"ui_heal": "UI tests (self-healing)", "contract": "API contract", "api_tests": "API functional tests",
-          "llm": "LLM red-team", "perf": "Performance (load tests)", "junit": "Test suites (JUnit)"}
+          "llm": "LLM red-team", "perf": "Performance (load tests)", "security": "Security (API tests and scanners)", "junit": "Test suites (JUnit)"}
 MAX_BYTES = 50 * 1024 * 1024
 
 
@@ -55,6 +56,8 @@ def detect(data: Any) -> str | None:
     if not isinstance(data, dict):
         return None
     tool = str(data.get("tool", ""))
+    if tool.startswith("k11-api-security-qa-mcp") or ("api" in data and "scanners" in data and "summary" in data):
+        return "security"
     if tool.startswith("k11-performance-qa-mcp") or ("endpoints" in data and "slos" in data and "findings" in data):
         return "perf"
     if "heal-ci" in tool or ("items" in data and isinstance(data.get("counts"), dict) and "applied" in data["counts"]):
@@ -132,6 +135,26 @@ def _facts(kind: str, d: dict) -> tuple[dict, str | None, str]:
                  "regressions": msgs("regression", "error_rate_regression"),
                  "insufficient_samples": len([f for f in fs if f.get("type") == "insufficient_samples"]),
                  "has_baseline": d.get("comparison") is not None},
+                d.get("generatedAt"), str(d.get("tool", "")))
+    if kind == "security":
+        s = d.get("summary") or {}
+        api = d.get("api") or {}
+        counted = [f for f in (d.get("scanners") or {}).get("findings", []) if f.get("status") in ("new", "acceptance_expired")]
+
+        def lines(sev: str) -> list[str]:
+            out = [f"{f.get('id')} {f.get('title')} ({f.get('endpoint')})" for f in api.get("findings", []) if f.get("severity") == sev]
+            out += [f"{f.get('tool')} {f.get('rule')} at {f.get('path')}{':' + str(f['line']) if f.get('line') else ''}"
+                    + (" (acceptance expired)" if f.get("status") == "acceptance_expired" else "")
+                    for f in counted if f.get("severity") == sev]
+            return out[:20]
+
+        tests = s.get("api_tests") or {}
+        return ({"environment": d.get("environment"), "status": d.get("status"), "reason": d.get("reason", ""),
+                 "critical": lines("critical"), "high": lines("high"), "medium": lines("medium"), "low": len(lines("low")),
+                 "expired_acceptances": [f"{f.get('rule')} (owner {f.get('acceptance', {}).get('owner')}, expired {f.get('acceptance', {}).get('expires')})"
+                                         for f in counted if f.get("status") == "acceptance_expired"][:20],
+                 "tests_failed": tests.get("failed", 0), "tests_inconclusive": tests.get("inconclusive", 0),
+                 "tests_not_run": tests.get("not_run", 0)},
                 d.get("generatedAt"), str(d.get("tool", "")))
     return {}, None, ""
 
