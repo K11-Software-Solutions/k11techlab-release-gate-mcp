@@ -1,0 +1,837 @@
+{
+  "tool": "k11-integration-qa-mcp 0.1.0",
+  "generatedAt": "2026-11-17T03:57:53+00:00",
+  "environment": "local",
+  "status": "completed",
+  "reason": "4 of 4 flow(s) did not pass",
+  "summary": {
+    "flows": 4,
+    "passed": 0,
+    "failed": 4,
+    "blocked": 0,
+    "error": 0,
+    "steps": 22,
+    "messages_published": 2,
+    "messages_expected": 6,
+    "message_expectations_failed": 2,
+    "schema_violations": 0,
+    "jobs_run": 2,
+    "jobs_failed": 0,
+    "waits_timed_out": 1,
+    "server_errors": 0
+  },
+  "flows": [
+    {
+      "name": "Cancelling an order releases its stock",
+      "file": "tests/integration/cancel_releases_stock.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "fixture: sku",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "shop",
+            "sql": "INSERT INTO inventory (sku, stock, reserved) VALUES (:sku, :stock, :reserved)",
+            "params": {
+              "sku": "SKU-595445",
+              "stock": 10,
+              "reserved": 0
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "sku": "SKU-595445",
+            "stock": 10,
+            "reserved": 0
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "listen",
+          "kind": "listen",
+          "status": "passed",
+          "request": {
+            "listen": "orders.events",
+            "as": "events"
+          },
+          "response": null,
+          "query": null,
+          "assertions": [
+            {
+              "check": "listening on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 0,
+          "cleanup": false
+        },
+        {
+          "name": "POST /orders",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:60177/orders",
+            "headers": {},
+            "body": {
+              "sku": "SKU-595445",
+              "qty": 2
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 19,
+            "content_type": "application/json",
+            "body": {
+              "id": "5a195e92-bd21-4027-acf6-e1271972d7f9",
+              "status": "pending"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9"
+          },
+          "error": null,
+          "ms": 19,
+          "cleanup": false
+        },
+        {
+          "name": "expect message",
+          "kind": "expect_message",
+          "status": "passed",
+          "request": {
+            "from": "events",
+            "topic": "orders.events",
+            "match": {
+              "$.type": "StockReserved",
+              "$.orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9"
+            },
+            "within_s": 10.0
+          },
+          "response": {
+            "message": {
+              "topic": "orders.events",
+              "key": "5a195e92-bd21-4027-acf6-e1271972d7f9",
+              "value": {
+                "type": "StockReserved",
+                "eventId": "8856134e-a986-44cc-9fb6-76343d8353e7",
+                "orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9",
+                "sku": "SKU-595445",
+                "qty": 1
+              },
+              "headers": {},
+              "partition": 0,
+              "offset": 1
+            },
+            "matched": 1,
+            "seen": 2
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 51,
+          "cleanup": false
+        },
+        {
+          "name": "send the cancel command",
+          "kind": "publish",
+          "status": "passed",
+          "request": {
+            "publish": "orders.commands",
+            "key": "5a195e92-bd21-4027-acf6-e1271972d7f9",
+            "value": {
+              "action": "cancel",
+              "orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9"
+            }
+          },
+          "response": {
+            "partition": 0,
+            "offset": 0
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "published to orders.commands",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "expect message",
+          "kind": "expect_message",
+          "status": "passed",
+          "request": {
+            "from": "events",
+            "topic": "orders.events",
+            "match": {
+              "$.type": "OrderCancelled",
+              "$.orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9"
+            },
+            "within_s": 10.0
+          },
+          "response": {
+            "message": {
+              "topic": "orders.events",
+              "key": "5a195e92-bd21-4027-acf6-e1271972d7f9",
+              "value": {
+                "type": "OrderCancelled",
+                "eventId": "449a6846-943d-4e05-a521-8cd62aebd917",
+                "orderId": "5a195e92-bd21-4027-acf6-e1271972d7f9"
+              },
+              "headers": {},
+              "partition": 0,
+              "offset": 2
+            },
+            "matched": 1,
+            "seen": 3
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 50,
+          "cleanup": false
+        },
+        {
+          "name": "the stock is released",
+          "kind": "wait_until",
+          "status": "failed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "reserved": -1
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "shop",
+            "sql": "SELECT reserved FROM inventory WHERE sku = :sku",
+            "params": {
+              "sku": "SKU-595445"
+            }
+          },
+          "assertions": [
+            {
+              "check": "reserved 0",
+              "ok": false,
+              "detail": "expected 0, got -1"
+            },
+            {
+              "check": "condition met within 10s",
+              "ok": false,
+              "detail": "not met after 41 check(s)"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 10089,
+          "cleanup": false
+        },
+        {
+          "name": "fixture cleanup: sku",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "shop",
+            "sql": "DELETE FROM inventory WHERE sku = :sku",
+            "params": {
+              "sku": "SKU-595445"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 23,
+          "cleanup": true
+        }
+      ],
+      "ms": 10239,
+      "error": null
+    },
+    {
+      "name": "An order reserves stock through the inventory consumer",
+      "file": "tests/integration/order_reserves_stock.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "fixture: sku",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "shop",
+            "sql": "INSERT INTO inventory (sku, stock, reserved) VALUES (:sku, :stock, :reserved)",
+            "params": {
+              "sku": "SKU-138087",
+              "stock": 10,
+              "reserved": 0
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "sku": "SKU-138087",
+            "stock": 10,
+            "reserved": 0
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "listen",
+          "kind": "listen",
+          "status": "passed",
+          "request": {
+            "listen": "orders.events",
+            "as": "events"
+          },
+          "response": null,
+          "query": null,
+          "assertions": [
+            {
+              "check": "listening on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 0,
+          "cleanup": false
+        },
+        {
+          "name": "place an order for 3",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:60177/orders",
+            "headers": {},
+            "body": {
+              "sku": "SKU-138087",
+              "qty": 3
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 6,
+            "content_type": "application/json",
+            "body": {
+              "id": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+              "status": "pending"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018"
+          },
+          "error": null,
+          "ms": 6,
+          "cleanup": false
+        },
+        {
+          "name": "OrderCreated is published and matches the AsyncAPI contract",
+          "kind": "expect_message",
+          "status": "passed",
+          "request": {
+            "from": "events",
+            "topic": "orders.events",
+            "match": {
+              "$.type": "OrderCreated",
+              "$.orderId": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018"
+            },
+            "within_s": 10.0
+          },
+          "response": {
+            "message": {
+              "topic": "orders.events",
+              "key": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+              "value": {
+                "type": "OrderCreated",
+                "eventId": "de750dc9-0740-4bc5-b021-e3bdfcc0e0b5",
+                "orderId": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+                "sku": "SKU-138087",
+                "qty": 3,
+                "at": "2026-11-17T03:57:32Z"
+              },
+              "headers": {
+                "source": "shop-api"
+              },
+              "partition": 0,
+              "offset": 3
+            },
+            "matched": 1,
+            "seen": 1
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.events",
+              "ok": true,
+              "detail": ""
+            },
+            {
+              "check": "matches AsyncAPI message OrderCreated",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": false
+        },
+        {
+          "name": "the inventory consumer reserves all 3",
+          "kind": "expect_message",
+          "status": "failed",
+          "request": {
+            "from": "events",
+            "topic": "orders.events",
+            "match": {
+              "$.type": "StockReserved",
+              "$.orderId": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+              "$.qty": 3
+            },
+            "within_s": 10.0
+          },
+          "response": {
+            "closest": {
+              "topic": "orders.events",
+              "key": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+              "value": {
+                "type": "StockReserved",
+                "eventId": "de4cdc50-ed6a-49ce-ac25-c3418d4441f4",
+                "orderId": "5bcd7bf5-b9e7-42c3-ba23-38d48d555018",
+                "sku": "SKU-138087",
+                "qty": 1
+              },
+              "headers": {},
+              "partition": 0,
+              "offset": 4
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.events",
+              "ok": false,
+              "detail": "0 of 1 matching message(s) within 10s (2 message(s) on orders.events); closest: $.qty: expected 3, got 1"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 10008,
+          "cleanup": false
+        },
+        {
+          "name": "fixture cleanup: sku",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "shop",
+            "sql": "DELETE FROM inventory WHERE sku = :sku",
+            "params": {
+              "sku": "SKU-138087"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 25,
+          "cleanup": true
+        }
+      ],
+      "ms": 10047,
+      "error": null
+    },
+    {
+      "name": "An unreadable command goes to the dead-letter queue",
+      "file": "tests/integration/poison_message_dead_lettered.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "listen",
+          "kind": "listen",
+          "status": "passed",
+          "request": {
+            "listen": "orders.dlq",
+            "as": "dlq"
+          },
+          "response": null,
+          "query": null,
+          "assertions": [
+            {
+              "check": "listening on orders.dlq",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 0,
+          "cleanup": false
+        },
+        {
+          "name": "publish a command that isn't JSON",
+          "kind": "publish",
+          "status": "passed",
+          "request": {
+            "publish": "orders.commands",
+            "key": "poison-eb1b3d7b-7563-48c3-88e4-30f840531730",
+            "value": "cancel order 42 please"
+          },
+          "response": {
+            "partition": 0,
+            "offset": 1
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "published to orders.commands",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 0,
+          "cleanup": false
+        },
+        {
+          "name": "it is dead-lettered with the reason",
+          "kind": "expect_message",
+          "status": "failed",
+          "request": {
+            "from": "dlq",
+            "topic": "orders.dlq",
+            "match": {
+              "key": "poison-eb1b3d7b-7563-48c3-88e4-30f840531730",
+              "header:error": {
+                "exists": true
+              },
+              "value": "cancel order 42 please"
+            },
+            "within_s": 10.0
+          },
+          "response": null,
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.dlq",
+              "ok": false,
+              "detail": "0 of 1 matching message(s) within 10s (0 message(s) on orders.dlq)"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 10029,
+          "cleanup": false
+        }
+      ],
+      "ms": 10029,
+      "error": null
+    },
+    {
+      "name": "The sku_totals batch job is safe to run twice",
+      "file": "tests/integration/sku_totals_job.yaml",
+      "environment": "local",
+      "status": "failed",
+      "steps": [
+        {
+          "name": "fixture: sku",
+          "kind": "fixture",
+          "status": "passed",
+          "request": null,
+          "response": null,
+          "query": {
+            "database": "shop",
+            "sql": "INSERT INTO inventory (sku, stock, reserved) VALUES (:sku, :stock, :reserved)",
+            "params": {
+              "sku": "SKU-717105",
+              "stock": 10,
+              "reserved": 0
+            }
+          },
+          "assertions": [],
+          "saved": {
+            "sku": "SKU-717105",
+            "stock": 10,
+            "reserved": 0
+          },
+          "error": null,
+          "ms": null,
+          "cleanup": false
+        },
+        {
+          "name": "listen",
+          "kind": "listen",
+          "status": "passed",
+          "request": {
+            "listen": "orders.events",
+            "as": "events"
+          },
+          "response": null,
+          "query": null,
+          "assertions": [
+            {
+              "check": "listening on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 0,
+          "cleanup": false
+        },
+        {
+          "name": "POST /orders",
+          "kind": "call",
+          "status": "passed",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:60177/orders",
+            "headers": {},
+            "body": {
+              "sku": "SKU-717105",
+              "qty": 2
+            }
+          },
+          "response": {
+            "status": 201,
+            "ms": 6,
+            "content_type": "application/json",
+            "body": {
+              "id": "d5824038-217c-4f59-82b2-3c3827e4fca7",
+              "status": "pending"
+            }
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "status 201",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {
+            "orderId": "d5824038-217c-4f59-82b2-3c3827e4fca7"
+          },
+          "error": null,
+          "ms": 6,
+          "cleanup": false
+        },
+        {
+          "name": "expect message",
+          "kind": "expect_message",
+          "status": "passed",
+          "request": {
+            "from": "events",
+            "topic": "orders.events",
+            "match": {
+              "$.type": "StockReserved",
+              "$.orderId": "d5824038-217c-4f59-82b2-3c3827e4fca7"
+            },
+            "within_s": 10.0
+          },
+          "response": {
+            "message": {
+              "topic": "orders.events",
+              "key": "d5824038-217c-4f59-82b2-3c3827e4fca7",
+              "value": {
+                "type": "StockReserved",
+                "eventId": "4cada2ad-cb13-4535-9324-1d58fe96f82f",
+                "orderId": "d5824038-217c-4f59-82b2-3c3827e4fca7",
+                "sku": "SKU-717105",
+                "qty": 1
+              },
+              "headers": {},
+              "partition": 0,
+              "offset": 6
+            },
+            "matched": 1,
+            "seen": 2
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "message on orders.events",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 51,
+          "cleanup": false
+        },
+        {
+          "name": "run the job",
+          "kind": "run_job",
+          "status": "passed",
+          "request": {
+            "job": "sku_totals"
+          },
+          "response": {
+            "exit_code": 0,
+            "output": "sku_totals: 2 sku(s) updated"
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "job sku_totals exits 0",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 65,
+          "cleanup": false
+        },
+        {
+          "name": "run it again (a retry, or a rerun after a failure)",
+          "kind": "run_job",
+          "status": "passed",
+          "request": {
+            "job": "sku_totals"
+          },
+          "response": {
+            "exit_code": 0,
+            "output": "sku_totals: 2 sku(s) updated"
+          },
+          "query": null,
+          "assertions": [
+            {
+              "check": "job sku_totals exits 0",
+              "ok": true,
+              "detail": ""
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 62,
+          "cleanup": false
+        },
+        {
+          "name": "the total is still 2",
+          "kind": "db",
+          "status": "failed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [
+              {
+                "qty": 4
+              }
+            ],
+            "truncated": false
+          },
+          "query": {
+            "database": "shop",
+            "sql": "SELECT qty FROM sku_totals WHERE sku = :sku",
+            "params": {
+              "sku": "SKU-717105"
+            }
+          },
+          "assertions": [
+            {
+              "check": "qty 2",
+              "ok": false,
+              "detail": "expected 2, got 4"
+            }
+          ],
+          "saved": {},
+          "error": null,
+          "ms": 1,
+          "cleanup": false
+        },
+        {
+          "name": "fixture cleanup: sku",
+          "kind": "db",
+          "status": "passed",
+          "request": null,
+          "response": {
+            "rowcount": 1,
+            "rows": [],
+            "truncated": false
+          },
+          "query": {
+            "database": "shop",
+            "sql": "DELETE FROM inventory WHERE sku = :sku",
+            "params": {
+              "sku": "SKU-717105"
+            }
+          },
+          "assertions": [],
+          "saved": {},
+          "error": null,
+          "ms": 3,
+          "cleanup": true
+        }
+      ],
+      "ms": 210,
+      "error": null
+    }
+  ]
+}

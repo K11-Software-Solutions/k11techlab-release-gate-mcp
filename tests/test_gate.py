@@ -153,7 +153,7 @@ def test_mcp(rc, monkeypatch):
                 return json.loads(r.content[0].text)
 
             rules = j(await c.call_tool("list_rules", {}))
-            assert len(rules["rules"]) == 34
+            assert len(rules["rules"]) == 37
             ev = j(await c.call_tool("collect_evidence", {}))
             assert ev["missing_required"] == [] and len(ev["evidence"]) == 5
             res = j(await c.call_tool("evaluate_release", {"label": "rc2"}))

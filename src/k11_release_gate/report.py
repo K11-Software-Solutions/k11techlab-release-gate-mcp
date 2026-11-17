@@ -36,6 +36,11 @@ def _summary_cell(e: dict) -> str:
             return f"{f.get('status')}: {f.get('reason', '')}"[:120]
         return (f"{len(f['critical'])} critical, {len(f['high'])} high, {len(f['medium'])} medium; "
                 f"{f['tests_failed']} API test(s) failed")
+    if k == "integration":
+        if f.get("status") != "completed":
+            return f"{f.get('status')}: {f.get('reason', '')}"[:120]
+        return (f"{f['passed']}/{f['flows']} flows passed; {f['messages_published']} published, "
+                f"{f['messages_expected']} message checks, {f['jobs_run']} job run(s)")
     if k == "junit":
         return f"{f['tests']} tests, {f['failures'] + f['errors']} failed, {f['skipped']} skipped"
     return ""

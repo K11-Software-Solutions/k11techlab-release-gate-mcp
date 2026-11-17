@@ -27,6 +27,7 @@ The kind of evidence is recognised from the file's content:
 | LLM red-team (`assessment.json`) | [LLM Assure](https://github.com/K11-Software-Solutions/k11techlab-llm-assurance-toolkit) |
 | Performance under load (`perf-report.json`) | [k11 Performance QA](https://github.com/K11-Software-Solutions/k11techlab-performance-qa-mcp) `run` |
 | Security: OWASP API tests and scanner SARIF (`security-report.json`) | [k11 API Security QA](https://github.com/K11-Software-Solutions/k11techlab-api-security-qa-mcp) `run` |
+| Integration: API, Kafka, batch job and database flows (`integration-report.json`) | [k11 Integration QA](https://github.com/K11-Software-Solutions/k11techlab-integration-qa-mcp) `run` |
 | Any JUnit XML | pytest, Maven Surefire, Gradle, Jest, Playwright, … |
 
 ## Which checks does this change need?
@@ -124,6 +125,9 @@ rules:                                      # override any rule: block | needs_h
 | `security.not_run` | needs a person | the security run was refused or failed |
 | `security.medium` | condition | medium findings: plan a fix |
 | `security.inconclusive` | note | security tests that couldn't prove a result |
+| `integration.failed` | block | an integration flow failed: event missing or wrong, consumer effect, dead-letter queue, job |
+| `integration.flows_not_run` | needs a person | flows refused (writes not allowed, protected topic) or errored |
+| `integration.not_run` | needs a person | no integration flows ran |
 | `junit.failures` | block | failures or errors in any JUnit file |
 | `junit.skipped` | note | skipped tests |
 
@@ -164,7 +168,7 @@ This puts into practice the risk-proportionate human-in-the-loop idea from the K
 
 ```bash
 python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # bin/pip on macOS/Linux
-pytest   # real evidence from all seven tools, policy, determinism, diff-aware planning, CLI, MCP (23)
+pytest   # real evidence from all eight tools, policy, determinism, diff-aware planning, CLI, MCP (27)
 ```
 
 ## Roadmap

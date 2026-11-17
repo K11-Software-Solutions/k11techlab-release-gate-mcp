@@ -36,6 +36,7 @@ DEFAULT_EVIDENCE = {
     "llm": ["llm-assure-report/assessment.json", ".qa-mcp/llm-assure/assessment.json"],
     "perf": [".qa-mcp/perf-report/perf-report.json"],
     "security": [".qa-mcp/security-report/security-report.json"],
+    "integration": [".qa-mcp/integration-report/integration-report.json"],
     "junit": ["test-results/**/*.xml", "**/surefire-reports/TEST-*.xml", "junit*.xml"],
 }
 
@@ -155,6 +156,16 @@ RULES: list[Rule] = [
     Rule("security.inconclusive", "security", "info", "Security tests that were inconclusive or not run",
          lambda f, p: [(f"{f['tests_inconclusive']} inconclusive and {f['tests_not_run']} not-run security test(s)", [])]
          if f.get("tests_inconclusive") or f.get("tests_not_run") else []),
+    # Integration (API, messaging, batch jobs, databases)
+    Rule("integration.not_run", "integration", "needs_human", "No integration flows ran",
+         lambda f, p: [(f"Integration tests didn't run: {f.get('reason') or f.get('status')}", [])]
+         if f.get("status") == "not_run" else []),
+    Rule("integration.failed", "integration", "block", "An integration flow failed (event, consumer, dead-letter queue, job or database)",
+         lambda f, p: [(f"{_n(len(f['failed_flows']), 'integration flow')} failed", f["failed_flows"])]
+         if f.get("failed_flows") else []),
+    Rule("integration.flows_not_run", "integration", "needs_human", "Integration flows were refused (writes not allowed, protected topic) or errored",
+         lambda f, p: [(f"{_n(len(f['not_run_flows']), 'integration flow')} refused or errored", f["not_run_flows"])]
+         if f.get("not_run_flows") else []),
     # Any JUnit suite
     Rule("junit.failures", "junit", "block", "Test failures or errors in a JUnit report",
          lambda f, p: [(f"{_n(f['failures'] + f['errors'], 'test')} failed", f["failed_tests"])]

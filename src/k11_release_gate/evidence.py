@@ -7,6 +7,7 @@ Kinds, recognised from their content (not their file name):
   llm         assessment.json from LLM Assure (k11-llm-assure-mcp)
   perf        perf-report.json from k11 Performance QA (load tests, SLOs, regressions)
   security    security-report.json from k11 API Security QA (OWASP API tests + scanner SARIF)
+  integration integration-report.json from k11 Integration QA (API, Kafka, batch job and database flows)
   junit       any JUnit XML (pytest, Maven Surefire, Gradle, Jest, Playwright, ...)
 
 Each file becomes an Evidence record with its SHA-256, timestamp, age and a small set of
@@ -24,9 +25,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-KINDS = ("ui_heal", "contract", "api_tests", "llm", "perf", "security", "junit")
+KINDS = ("ui_heal", "contract", "api_tests", "llm", "perf", "security", "integration", "junit")
 LABELS = {"ui_heal": "UI tests (self-healing)", "contract": "API contract", "api_tests": "API functional tests",
-          "llm": "LLM red-team", "perf": "Performance (load tests)", "security": "Security (API tests and scanners)", "junit": "Test suites (JUnit)"}
+          "llm": "LLM red-team", "perf": "Performance (load tests)", "security": "Security (API tests and scanners)",
+          "integration": "Integration (messaging, jobs, databases)", "junit": "Test suites (JUnit)"}
 MAX_BYTES = 50 * 1024 * 1024
 
 
@@ -58,6 +60,9 @@ def detect(data: Any) -> str | None:
     tool = str(data.get("tool", ""))
     if tool.startswith("k11-api-security-qa-mcp") or ("api" in data and "scanners" in data and "summary" in data):
         return "security"
+    if tool.startswith("k11-integration-qa-mcp") or ("flows" in data and isinstance(data.get("summary"), dict)
+                                                     and "messages_published" in data["summary"]):
+        return "integration"  # before api_tests: an integration report also has flows and server_errors
     if tool.startswith("k11-performance-qa-mcp") or ("endpoints" in data and "slos" in data and "findings" in data):
         return "perf"
     if "heal-ci" in tool or ("items" in data and isinstance(data.get("counts"), dict) and "applied" in data["counts"]):
@@ -155,6 +160,26 @@ def _facts(kind: str, d: dict) -> tuple[dict, str | None, str]:
                                          for f in counted if f.get("status") == "acceptance_expired"][:20],
                  "tests_failed": tests.get("failed", 0), "tests_inconclusive": tests.get("inconclusive", 0),
                  "tests_not_run": tests.get("not_run", 0)},
+                d.get("generatedAt"), str(d.get("tool", "")))
+    if kind == "integration":
+        s = d.get("summary") or {}
+        flows = d.get("flows", [])
+
+        def why(f: dict) -> str:
+            st = next((x for x in f.get("steps", []) if not x.get("cleanup") and x.get("status") not in ("passed", "skipped")), None)
+            if st is None:
+                return f"{f.get('name')}: {f.get('error') or f.get('status')}"
+            bad = "; ".join(f"{a.get('check')}: {a.get('detail')}" if a.get("detail") else str(a.get("check"))
+                            for a in st.get("assertions", []) if not a.get("ok"))
+            return f"{f.get('name')}: {st.get('name')} ({st.get('kind')}): {st.get('error') or bad}"[:300]
+
+        return ({"environment": d.get("environment"), "status": d.get("status"), "reason": d.get("reason", ""),
+                 "flows": s.get("flows", len(flows)), "passed": s.get("passed", 0), "failed": s.get("failed", 0),
+                 "blocked": s.get("blocked", 0), "errors": s.get("error", 0),
+                 "messages_published": s.get("messages_published", 0), "messages_expected": s.get("messages_expected", 0),
+                 "jobs_run": s.get("jobs_run", 0), "schema_violations": s.get("schema_violations", 0),
+                 "failed_flows": [why(f) for f in flows if f.get("status") == "failed"][:20],
+                 "not_run_flows": [why(f) for f in flows if f.get("status") in ("blocked", "error")][:20]},
                 d.get("generatedAt"), str(d.get("tool", "")))
     return {}, None, ""
 

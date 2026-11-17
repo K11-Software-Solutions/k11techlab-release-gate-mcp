@@ -34,6 +34,12 @@ DEFAULT_TRIGGERS: dict[str, list[str]] = {
                  "**/routes/**", "**/controllers/**", "**/handlers/**", "**/requirements*.txt", "**/pyproject.toml",
                  "**/package.json", "**/package-lock.json", "**/pom.xml", "**/build.gradle*", "**/go.mod",
                  "**/Dockerfile", ".qa-mcp/security.yaml", ".qa-mcp/security-accepted.yaml"],
+    "integration": ["**/consumers/**", "**/consumer/**", "**/producers/**", "**/producer/**", "**/listeners/**",
+                    "**/messaging/**", "**/events/**", "**/kafka/**", "**/queues/**", "**/streams/**", "**/jobs/**",
+                    "**/batch/**", "**/schedulers/**", "**/workers/**", "**/middleware/**",
+                    "**/*Consumer*.java", "**/*Listener*.java", "**/*Producer*.java", "**/*consumer*.py",
+                    "**/*producer*.py", "**/*worker*.py", "**/asyncapi*.yaml", "**/asyncapi*.yml",
+                    "tests/integration/**", ".qa-mcp/integration.yaml"],
 }
 HOW = {
     "ui_heal": "k11 Playwright QA or Selenium QA: heal-ci (or run_tests + heal_locator)",
@@ -42,6 +48,7 @@ HOW = {
     "llm": "LLM Assure: llm-assure run (or run_assessment)",
     "perf": "k11 Performance QA: k11-performance-qa-mcp run (or run_load_test)",
     "security": "k11 API Security QA: k11-api-security-qa-mcp run (or run_security_tests)",
+    "integration": "k11 Integration QA: k11-integration-qa-mcp run (or run_integration_tests)",
     "junit": "your existing test suites with JUnit XML output",
 }
 REF = re.compile(r"^[\w./~^@{}-]+$")
