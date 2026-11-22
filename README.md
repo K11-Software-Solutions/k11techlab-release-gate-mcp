@@ -76,6 +76,8 @@ QA_MCP_ROOT=demo/rc2 k11-release-gate-mcp evaluate --label rc2
 
 ## The policy: `.qa-mcp/release-policy.yaml`
 
+> All K11 QA tools keep their settings, baselines and reports in `.qa-mcp/`. [What each file is for, and what to commit](docs/qa-mcp-folder.md).
+
 ```yaml
 name: Order platform release policy
 evidence:                                   # where each tool writes its report (globs inside the project)
