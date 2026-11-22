@@ -145,7 +145,7 @@ The Claude Code plugin adds `/release-check`, which collects the evidence, tells
 
 ## In CI
 
-On GitHub, use the **[k11 Release Gate Action](https://github.com/K11-Software-Solutions/k11techlab-release-gate-action)**: it installs the gate, diffs against the pull request's base branch, posts the decision as a PR comment (updated in place), uploads the audit record and fails at the verdict you choose.
+On GitHub, use the **[k11 Release Gate Action](https://github.com/K11-Software-Solutions/k11techlab-release-gate-action)**: it installs the gate, diffs against the pull request's base branch, posts the decision as a PR comment (updated in place), uploads the audit record and fails at the verdict you choose. The [K11 Shop demo](https://github.com/K11-Software-Solutions/k11techlab-release-gate-demo) shows it on real pull requests.
 
 ```yaml
 - uses: K11-Software-Solutions/k11techlab-release-gate-action@v1
